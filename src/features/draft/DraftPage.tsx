@@ -1,4 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { draftApi } from '../../api/services/draft';
+import { picksApi } from '../../api/services/picks';
+import { PickDetail } from '../../api/types';
 
 interface DraftPlayer {
   id: string;
@@ -7,29 +10,74 @@ interface DraftPlayer {
   isCurrentTurn: boolean;
 }
 
-interface DraftPick {
-  id: string;
-  playerName: string;
-  celebrityName: string;
-  pickNumber: number;
-  timestamp: string;
-}
-
 export default function DraftPage() {
   const [draftStatus, setDraftStatus] = useState<'not_started' | 'in_progress' | 'completed'>('not_started');
   const [players, setPlayers] = useState<DraftPlayer[]>([]);
-  const [picks, setPicks] = useState<DraftPick[]>([]);
+  const [picks, setPicks] = useState<PickDetail[]>([]);
   const [currentPick, setCurrentPick] = useState('');
+  const [currentDrafter, setCurrentDrafter] = useState<{ id: string; name: string } | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const currentYear = new Date().getFullYear();
 
-  const handleStartDraft = () => {
-    // TODO: Implement draft start logic
-    setDraftStatus('in_progress');
+  const loadPicks = async () => {
+    try {
+      const response = await picksApi.getAll(currentYear);
+      setPicks(response.data);
+    } catch (err) {
+      setError('Failed to load draft history');
+      console.error(err);
+    }
   };
 
-  const handleSubmitPick = () => {
-    if (!currentPick.trim()) return;
-    // TODO: Implement pick submission logic
-    setCurrentPick('');
+  const fetchNextDrafter = async () => {
+    try {
+      const response = await draftApi.getNextDrafter();
+      if (response.data) {
+        setCurrentDrafter({
+          id: response.data.player_id,
+          name: response.data.player_name
+        });
+        setDraftStatus('in_progress');
+      }
+    } catch (err) {
+      setError('Failed to fetch next drafter');
+      console.error(err);
+    }
+  };
+
+  useEffect(() => {
+    const loadInitialData = async () => {
+      await Promise.all([
+        fetchNextDrafter(),
+        loadPicks()
+      ]);
+    };
+    loadInitialData();
+  }, []);
+
+  const handleStartDraft = () => {
+    fetchNextDrafter();
+  };
+
+  const handleSubmitPick = async () => {
+    if (!currentPick.trim() || !currentDrafter) return;
+    
+    try {
+      await draftApi.draftPerson({
+        name: currentPick.trim(),
+        player_id: currentDrafter.id
+      });
+      
+      setCurrentPick('');
+      // Fetch the next drafter after successful submission
+      fetchNextDrafter();
+      
+      // Reload the picks to show the updated history
+      await loadPicks();
+    } catch (err) {
+      setError('Failed to submit pick');
+      console.error(err);
+    }
   };
 
   return (
@@ -55,6 +103,22 @@ export default function DraftPage() {
       </div>
 
       <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
+        {/* Error Display */}
+        {error && (
+          <div className="col-span-2 rounded-md bg-red-50 p-4">
+            <div className="flex">
+              <div className="flex-shrink-0">
+                <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                </svg>
+              </div>
+              <div className="ml-3">
+                <h3 className="text-sm font-medium text-red-800">{error}</h3>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Draft Status and Current Turn */}
         <div className="card">
           <h2 className="text-lg font-medium text-gray-900">Draft Status</h2>
@@ -69,33 +133,29 @@ export default function DraftPage() {
                 {draftStatus.replace('_', ' ').toUpperCase()}
               </span>
             </div>
-            {draftStatus === 'in_progress' && (
+            {draftStatus === 'in_progress' && currentDrafter && (
               <div className="mt-4">
                 <h3 className="text-sm font-medium text-gray-900">Current Turn</h3>
-                {players.map(player => (
-                  <div
-                    key={player.id}
-                    className={`mt-2 p-2 rounded-md ${
-                      player.isCurrentTurn ? 'bg-blue-50 border border-blue-200' : ''
-                    }`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium">{player.name}</span>
-                      <span className="text-sm text-gray-500">
-                        {player.picksRemaining} picks remaining
-                      </span>
-                    </div>
+                <div className="mt-2 p-4 rounded-md bg-blue-50 border border-blue-200">
+                  <div className="flex items-center justify-between">
+                    <span className="text-lg font-medium text-blue-900">{currentDrafter.name}</span>
+                    <span className="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-sm font-medium text-blue-800">
+                      Current Drafter
+                    </span>
                   </div>
-                ))}
+                </div>
               </div>
             )}
           </div>
         </div>
 
         {/* Pick Submission */}
-        {draftStatus === 'in_progress' && (
+        {draftStatus === 'in_progress' && currentDrafter && (
           <div className="card">
             <h2 className="text-lg font-medium text-gray-900">Make Your Pick</h2>
+            <p className="mt-2 text-sm text-gray-600">
+              It's {currentDrafter.name}'s turn to draft a celebrity.
+            </p>
             <div className="mt-4">
               <div>
                 <label htmlFor="celebrity" className="block text-sm font-medium text-gray-700">
@@ -120,7 +180,7 @@ export default function DraftPage() {
                   onClick={handleSubmitPick}
                   disabled={!currentPick.trim()}
                 >
-                  Submit Pick
+                  Draft {currentPick.trim() || 'Celebrity'}
                 </button>
               </div>
             </div>
@@ -158,18 +218,18 @@ export default function DraftPage() {
                 </tr>
               ) : (
                 picks.map((pick) => (
-                  <tr key={pick.id}>
+                  <tr key={pick.player_id + pick.pick_timestamp}>
                     <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
-                      {pick.pickNumber}
+                      {pick.draft_order}
                     </td>
                     <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                      {pick.playerName}
+                      {pick.player_name}
                     </td>
                     <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                      {pick.celebrityName}
+                      {pick.pick_person_name || 'N/A'}
                     </td>
                     <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                      {new Date(pick.timestamp).toLocaleTimeString()}
+                      {pick.pick_timestamp ? new Date(pick.pick_timestamp).toLocaleTimeString() : 'N/A'}
                     </td>
                   </tr>
                 ))
