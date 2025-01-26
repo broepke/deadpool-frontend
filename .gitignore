@@ -7,6 +7,7 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# Dependencies
 node_modules
 dist
 dist-ssr
@@ -23,63 +24,34 @@ dist-ssr
 *.sln
 *.sw?
 
-# Tailwind CSS
-tailwind.config.js
-tailwind.config.cjs
-postcss.config.js
+# Environment files
+.env
+.env.*
+!.env.example
 
-# Next.js
-.next/
-out/
+# Testing
+coverage
 
-# Nuxt.js
-.nuxt/
-dist/
+# Production build
+build
 
-# Svelte
-.svelte-kit/
-
-# Gatsby
-.cache/
-public/
-
-# Angular
-.angular/
-
-# Vue.js
-.vuepress/
-dist/
-
-# Storybook
-storybook-static/
-
-# Rollup
-rollup.config.js
-
-# Parcel
-.cache/
-dist/
-
-# Webpack
-webpack.config.js
+# Temporary files
+*.tmp
+*.temp
+.cache
 
 # TypeScript
 *.tsbuildinfo
 
-# Jest
-coverage/
+# Vite
+.vite
 
-# Cypress
-cypress/screenshots/
-cypress/videos/
+# AWS credentials and config
+.aws
+aws.config.js
 
-# Miscellaneous
-.env
+# Local development overrides
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
-.npmrc
-.yarnrc
-.pnpmfile.cjs
-.pnpm-debug.log
