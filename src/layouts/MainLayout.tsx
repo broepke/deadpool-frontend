@@ -1,6 +1,7 @@
 import { Link, Outlet } from 'react-router-dom';
 import { Disclosure } from '@headlessui/react';
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
+import { useAuth } from "react-oidc-context";
 
 const navigation = [
   { name: 'Players', href: '/players' },
@@ -10,6 +11,15 @@ const navigation = [
 ];
 
 export default function MainLayout() {
+  const auth = useAuth();
+
+  const signOutRedirect = () => {
+    const clientId = import.meta.env.VITE_COGNITO_CLIENT_ID;
+    const logoutUri = import.meta.env.VITE_COGNITO_LOGOUT_URI;
+    const cognitoDomain = import.meta.env.VITE_COGNITO_DOMAIN;
+    window.location.href = `${cognitoDomain}/logout?client_id=${clientId}&logout_uri=${encodeURIComponent(logoutUri)}`;
+  };
+
   return (
     <div className="min-h-screen bg-gray-100">
       <Disclosure as="nav" className="bg-gray-800">
@@ -37,6 +47,30 @@ export default function MainLayout() {
                     </div>
                   </div>
                 </div>
+                <div className="hidden md:block">
+                  {auth.isLoading ? (
+                    <span className="text-gray-300">Loading...</span>
+                  ) : auth.error ? (
+                    <span className="text-red-400">Error: {auth.error.message}</span>
+                  ) : auth.isAuthenticated ? (
+                    <div className="flex items-center space-x-4">
+                      <span className="text-gray-300">{auth.user?.profile.email}</span>
+                      <button
+                        onClick={() => signOutRedirect()}
+                        className="text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium"
+                      >
+                        Sign out
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => auth.signinRedirect()}
+                      className="text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium"
+                    >
+                      Sign in
+                    </button>
+                  )}
+                </div>
                 <div className="-mr-2 flex md:hidden">
                   <Disclosure.Button className="inline-flex items-center justify-center rounded-md bg-gray-800 p-2 text-gray-400 hover:bg-gray-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800">
                     <span className="sr-only">Open main menu</span>
@@ -61,6 +95,24 @@ export default function MainLayout() {
                     {item.name}
                   </Link>
                 ))}
+                {auth.isAuthenticated ? (
+                  <>
+                    <div className="text-gray-300 px-3 py-2">{auth.user?.profile.email}</div>
+                    <button
+                      onClick={() => signOutRedirect()}
+                      className="text-gray-300 hover:bg-gray-700 hover:text-white w-full text-left rounded-md px-3 py-2 text-base font-medium"
+                    >
+                      Sign out
+                    </button>
+                  </>
+                ) : (
+                  <button
+                    onClick={() => auth.signinRedirect()}
+                    className="text-gray-300 hover:bg-gray-700 hover:text-white w-full text-left rounded-md px-3 py-2 text-base font-medium"
+                  >
+                    Sign in
+                  </button>
+                )}
               </div>
             </Disclosure.Panel>
           </>
