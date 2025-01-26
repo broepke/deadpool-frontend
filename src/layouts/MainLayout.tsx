@@ -13,11 +13,24 @@ const navigation = [
 export default function MainLayout() {
   const auth = useAuth();
 
-  const signOutRedirect = () => {
-    const clientId = import.meta.env.VITE_COGNITO_CLIENT_ID;
-    const logoutUri = import.meta.env.VITE_COGNITO_LOGOUT_URI;
-    const cognitoDomain = import.meta.env.VITE_COGNITO_DOMAIN;
-    window.location.href = `${cognitoDomain}/logout?client_id=${clientId}&logout_uri=${encodeURIComponent(logoutUri)}`;
+  const handleSignOut = async () => {
+    try {
+      // First, remove the user locally
+      await auth.removeUser();
+      // Clear any local storage tokens
+      localStorage.clear();
+      
+      // Build the logout URL with all required parameters
+      const params = new URLSearchParams({
+        client_id: import.meta.env.VITE_COGNITO_CLIENT_ID,
+        logout_uri: import.meta.env.VITE_COGNITO_LOGOUT_URI
+      });
+      
+      // Redirect to Cognito logout using custom domain
+      window.location.href = `${import.meta.env.VITE_COGNITO_DOMAIN}/logout?${params.toString()}`;
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
   };
 
   return (
@@ -56,7 +69,7 @@ export default function MainLayout() {
                     <div className="flex items-center space-x-4">
                       <span className="text-gray-300">{auth.user?.profile.email}</span>
                       <button
-                        onClick={() => signOutRedirect()}
+                        onClick={handleSignOut}
                         className="text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium"
                       >
                         Sign out
@@ -99,7 +112,7 @@ export default function MainLayout() {
                   <>
                     <div className="text-gray-300 px-3 py-2">{auth.user?.profile.email}</div>
                     <button
-                      onClick={() => signOutRedirect()}
+                      onClick={handleSignOut}
                       className="text-gray-300 hover:bg-gray-700 hover:text-white w-full text-left rounded-md px-3 py-2 text-base font-medium"
                     >
                       Sign out
