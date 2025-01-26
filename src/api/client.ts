@@ -51,7 +51,7 @@ class ApiClient {
         console.log('Raw Response:', response);
         console.log('Response Status:', response.status);
         console.log('Response Data:', JSON.stringify(response.data, null, 2));
-        return response.data; // Return the data directly since we're not using ApiResponse wrapper
+        return response; // Return the full response to avoid double data extraction
       },
       (error: AxiosError) => {
         if (error.response) {
@@ -100,7 +100,7 @@ class ApiClient {
 
   // Generic GET request
   async get<T>(url: string, params?: object): Promise<T> {
-    const response = await this.client.get(url, { params });
+    const response = await this.client.get<T>(url, { params });
     return response.data;
   }
 

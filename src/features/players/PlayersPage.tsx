@@ -12,7 +12,7 @@ export default function PlayersPage() {
       try {
         setLoading(true);
         const response = await playersApi.getAll();
-        setPlayers(response);
+        setPlayers(response.data);
         setError(null);
       } catch (err) {
         console.error('Failed to fetch players:', err);
