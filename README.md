@@ -1,62 +1,88 @@
-# Deadpool Game Frontend
+# DeadPool - Celebrity Draft Game Frontend
 
-A React-based frontend application for managing and playing the Deadpool game. Players participate in a draft to pick celebrities, and scores are tracked on a yearly leaderboard.
+A web application for managing a celebrity draft game where players pick celebrities and score points based on outcomes throughout the year.
 
 ## Features
 
-- **Player Draft System**: Players can participate in a draft to pick celebrities
-- **Leaderboard**: Track scores by year (2023 onwards)
-- **Authentication**: Secure login system for players
-- **Admin Panel**: Administrative interface for game management
+- Player Management: Add, edit, and remove players
+- Celebrity Picks: Track celebrity selections for each player
+- Leaderboard: Real-time standings and scores
+- Draft Interface: Facilitate the draft process between players
 
 ## Technology Stack
 
 - React 18 with TypeScript
 - Vite for build tooling
-- TanStack Query for API data fetching
-- Axios for HTTP requests
-- Tailwind CSS for styling
+- TailwindCSS for styling
+- React Router for navigation
+- Axios for API communication
+
+## Project Structure
+
+```
+src/
+├── components/        # Reusable UI components
+├── features/         # Feature-specific components
+│   ├── players/      # Player management
+│   ├── picks/        # Celebrity picks tracking
+│   ├── leaderboard/  # Standings and scores
+│   └── draft/        # Draft interface
+├── layouts/          # Layout components
+└── assets/          # Static assets
+```
 
 ## Development
 
-### Prerequisites
-
-- Node.js (latest LTS version recommended)
-- npm or yarn
-
-### Setup
-
-1. Clone the repository
 1. Install dependencies:
-
 ```bash
 npm install
 ```
 
-1. Create a `.env` file in the root directory with:
+2. Start development server:
+```bash
+npm run dev
+```
 
-  ```bash
-  VITE_API_URL=http://localhost:8000  # or your API endpoint
-  ```
-
-1. Start the development server:
-
-  ```bash
-  npm run dev
-  ```
-
-### Building for Production
-
+3. Build for production:
 ```bash
 npm run build
 ```
 
-## Project Structure
+## Deployment
 
-- `/src/features/` - Main feature modules (admin, auth, draft, leaderboard)
-- `/src/api/` - API configuration and endpoints
-- `/src/components/` - Shared React components
-- `/src/context/` - React context providers
-- `/src/hooks/` - Custom React hooks
-- `/src/utils/` - Utility functions
-- `/src/types/` - TypeScript type definitions
+This application is designed to be hosted on AWS S3 as a static website. To deploy:
+
+1. Build the application:
+```bash
+npm run build
+```
+
+2. Upload the contents of the `dist` directory to your S3 bucket
+3. Configure the S3 bucket for static website hosting
+4. Set up CloudFront distribution (recommended for HTTPS and better performance)
+
+## Backend Integration
+
+The frontend is designed to work with a serverless backend built with:
+- AWS Lambda
+- API Gateway
+- DynamoDB
+
+API endpoints will be configured in a separate environment configuration file when the backend is ready.
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a Pull Request
+
+
+## Deploy Production
+
+```bash
+Local development using npm run dev
+Production builds using npm run build:prod
+Deployment to AWS using npm run deploy:prod
+```
