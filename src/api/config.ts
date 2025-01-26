@@ -36,7 +36,8 @@ export const endpoints = {
     playerPicks: (playerId: string) => `/api/v1/deadpool/player-picks/${playerId}`,
     updatePick: (playerId: string) => `/api/v1/deadpool/player-picks/${playerId}`,
     allPicks: () => '/api/v1/deadpool/picks',
-    nextDrafter: () => '/api/v1/deadpool/next-drafter',
+    nextDrafter: () => '/api/v1/deadpool/draft-next',
+    submitPick: () => '/api/v1/deadpool/draft',
   },
   leaderboard: {
     get: (year?: number) => `/api/v1/deadpool/leaderboard${year ? `?year=${year}` : ''}`,
