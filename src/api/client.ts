@@ -13,7 +13,10 @@ class ApiClient {
       baseURL: API_URL,
       headers: {
         'Content-Type': 'application/json',
+        'Accept': 'application/json',
       },
+      // Add CORS support
+      withCredentials: false,
     });
 
     // Add request interceptor for authentication and logging
@@ -45,11 +48,10 @@ class ApiClient {
     // Add response interceptor for error handling and logging
     this.client.interceptors.response.use(
       (response) => {
-        console.log('Received response:', {
-          status: response.status,
-          data: response.data,
-        });
-        return response;
+        console.log('Raw Response:', response);
+        console.log('Response Status:', response.status);
+        console.log('Response Data:', JSON.stringify(response.data, null, 2));
+        return response.data; // Return the data directly since we're not using ApiResponse wrapper
       },
       (error: AxiosError) => {
         if (error.response) {
@@ -63,7 +65,6 @@ class ApiClient {
 
           switch (error.response.status) {
             case 401:
-              // TODO: Handle unauthorized access
               console.error('Unauthorized access');
               break;
             case 403:
@@ -99,25 +100,25 @@ class ApiClient {
 
   // Generic GET request
   async get<T>(url: string, params?: object): Promise<T> {
-    const response = await this.client.get<T>(url, { params });
+    const response = await this.client.get(url, { params });
     return response.data;
   }
 
   // Generic POST request
   async post<T>(url: string, data: object): Promise<T> {
-    const response = await this.client.post<T>(url, data);
+    const response = await this.client.post(url, data);
     return response.data;
   }
 
   // Generic PUT request with optional query parameters
   async put<T>(url: string, data?: object | null, params?: object): Promise<T> {
-    const response = await this.client.put<T>(url, data, { params });
+    const response = await this.client.put(url, data, { params });
     return response.data;
   }
 
   // Generic DELETE request
   async delete<T>(url: string): Promise<T> {
-    const response = await this.client.delete<T>(url);
+    const response = await this.client.delete(url);
     return response.data;
   }
 }
