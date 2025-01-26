@@ -36,21 +36,4 @@ aws s3 cp dist/index.html s3://$AWS_S3_BUCKET/index.html \
   --cache-control "no-cache,no-store,must-revalidate" \
   --region $AWS_REGION
 
-# # Invalidate CloudFront cache if distribution ID is provided
-# if [ ! -z "$AWS_CLOUDFRONT_DISTRIBUTION_ID" ]; then
-#   echo "🔄 Invalidating CloudFront cache..."
-#   aws cloudfront create-invalidation \
-#     --distribution-id $AWS_CLOUDFRONT_DISTRIBUTION_ID \
-#     --paths "/*" \
-#     --region $AWS_REGION
-# fi
-
 echo "✅ Deployment completed successfully!"
-
-# # Print URLs
-# echo "📱 Application URLs:"
-# echo "S3 URL: http://$AWS_S3_BUCKET.s3-website-$AWS_REGION.amazonaws.com"
-# if [ ! -z "$AWS_CLOUDFRONT_DISTRIBUTION_ID" ]; then
-#   CLOUDFRONT_URL=$(aws cloudfront get-distribution --id $AWS_CLOUDFRONT_DISTRIBUTION_ID --query 'Distribution.DomainName' --output text --region $AWS_REGION)
-#   echo "CloudFront URL: https://$CLOUDFRONT_URL"
-# fi
