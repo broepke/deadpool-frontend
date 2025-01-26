@@ -3,16 +3,8 @@ import { draftApi } from '../../api/services/draft';
 import { picksApi } from '../../api/services/picks';
 import { PickDetail } from '../../api/types';
 
-interface DraftPlayer {
-  id: string;
-  name: string;
-  picksRemaining: number;
-  isCurrentTurn: boolean;
-}
-
 export default function DraftPage() {
   const [draftStatus, setDraftStatus] = useState<'not_started' | 'in_progress' | 'completed'>('not_started');
-  const [players, setPlayers] = useState<DraftPlayer[]>([]);
   const [picks, setPicks] = useState<PickDetail[]>([]);
   const [currentPick, setCurrentPick] = useState('');
   const [currentDrafter, setCurrentDrafter] = useState<{ id: string; name: string } | null>(null);
