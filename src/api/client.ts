@@ -1,7 +1,9 @@
-import axios, { AxiosError, AxiosInstance } from 'axios';
+import axios, { AxiosError, AxiosInstance, InternalAxiosRequestConfig } from 'axios';
 
 // Get the API URL from environment variables, fallback to localhost for development
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+
+console.log('API Client initialized with base URL:', API_URL);
 
 class ApiClient {
   private client: AxiosInstance;
@@ -14,9 +16,19 @@ class ApiClient {
       },
     });
 
-    // Add request interceptor for authentication
+    // Add request interceptor for authentication and logging
     this.client.interceptors.request.use(
-      (config) => {
+      (config: InternalAxiosRequestConfig) => {
+        // Log the full request URL and params
+        const fullUrl = `${config.baseURL || ''}${config.url || ''}`;
+        console.log('Making request to:', fullUrl);
+        if (config.params) {
+          console.log('Request params:', config.params);
+        }
+        if (config.data) {
+          console.log('Request data:', config.data);
+        }
+
         // TODO: Add authentication token when auth is implemented
         // const token = localStorage.getItem('auth_token');
         // if (token) {
@@ -25,17 +37,30 @@ class ApiClient {
         return config;
       },
       (error) => {
+        console.error('Request interceptor error:', error);
         return Promise.reject(error);
       }
     );
 
-    // Add response interceptor for error handling
+    // Add response interceptor for error handling and logging
     this.client.interceptors.response.use(
-      (response) => response,
+      (response) => {
+        console.log('Received response:', {
+          status: response.status,
+          data: response.data,
+        });
+        return response;
+      },
       (error: AxiosError) => {
         if (error.response) {
           // The request was made and the server responded with a status code
           // that falls out of the range of 2xx
+          console.error('Response error:', {
+            status: error.response.status,
+            data: error.response.data,
+            headers: error.response.headers,
+          });
+
           switch (error.response.status) {
             case 401:
               // TODO: Handle unauthorized access
@@ -55,10 +80,16 @@ class ApiClient {
           }
         } else if (error.request) {
           // The request was made but no response was received
-          console.error('No response received:', error.request);
+          console.error('No response received:', {
+            request: error.request,
+            config: error.config,
+          });
         } else {
           // Something happened in setting up the request that triggered an Error
-          console.error('Error setting up request:', error.message);
+          console.error('Error setting up request:', {
+            message: error.message,
+            config: error.config,
+          });
         }
 
         return Promise.reject(error);
