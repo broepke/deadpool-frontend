@@ -68,6 +68,12 @@ export default function MainLayout() {
                   ) : auth.isAuthenticated ? (
                     <div className="flex items-center space-x-4">
                       <span className="text-gray-300">{auth.user?.profile.email}</span>
+                      <Link
+                        to="/profile"
+                        className="text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium"
+                      >
+                        Profile
+                      </Link>
                       <button
                         onClick={handleSignOut}
                         className="text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium"
@@ -111,6 +117,12 @@ export default function MainLayout() {
                 {auth.isAuthenticated ? (
                   <>
                     <div className="text-gray-300 px-3 py-2">{auth.user?.profile.email}</div>
+                    <Link
+                      to="/profile"
+                      className="text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium"
+                    >
+                      Profile
+                    </Link>
                     <button
                       onClick={handleSignOut}
                       className="text-gray-300 hover:bg-gray-700 hover:text-white w-full text-left rounded-md px-3 py-2 text-base font-medium"

@@ -4,6 +4,7 @@ import PlayersPage from './features/players/PlayersPage';
 import PicksPage from './features/picks/PicksPage';
 import LeaderboardPage from './features/leaderboard/LeaderboardPage';
 import DraftPage from './features/draft/DraftPage';
+import ProfilePage from './features/profile/ProfilePage';
 
 function App() {
   return (
@@ -15,6 +16,7 @@ function App() {
           <Route path="picks" element={<PicksPage />} />
           <Route path="leaderboard" element={<LeaderboardPage />} />
           <Route path="draft" element={<DraftPage />} />
+          <Route path="profile" element={<ProfilePage />} />
           <Route path="*" element={<Navigate to="/leaderboard" replace />} />
         </Route>
       </Routes>
