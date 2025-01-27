@@ -86,3 +86,11 @@ Local development using npm run dev
 Production builds using npm run build:prod
 Deployment to AWS using npm run deploy:prod
 ```
+
+## AWS Cognito
+
+```bash
+npm install oidc-client-ts react-oidc-context --save
+```
+
+
