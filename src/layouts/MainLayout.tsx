@@ -1,3 +1,4 @@
+import React from 'react';
 import { Link, Outlet } from 'react-router-dom';
 import { Disclosure } from '@headlessui/react';
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
@@ -12,13 +13,73 @@ const navigation = [
 
 export default function MainLayout() {
   const auth = useAuth();
+  const [forceUpdate, setForceUpdate] = React.useState(0);
+  
+  // Debug logging for auth state changes
+  React.useEffect(() => {
+    console.log('Auth state changed:', {
+      isLoading: auth.isLoading,
+      isAuthenticated: auth.isAuthenticated,
+      user: auth.user,
+      error: auth.error,
+      activeNavigator: auth.activeNavigator,
+      hasUser: !!auth.user,
+      hasIdToken: !!auth.user?.id_token,
+      hasAccessToken: !!auth.user?.access_token,
+      signInStatus: auth.activeNavigator || auth.isLoading ? 'in-progress' : auth.isAuthenticated ? 'signed-in' : 'signed-out',
+      timestamp: new Date().toISOString()
+    });
+  }, [auth.isLoading, auth.isAuthenticated, auth.user, auth.error, auth.activeNavigator, forceUpdate]);
+
+  // Listen for auth completion event
+  React.useEffect(() => {
+    const handleAuthComplete = () => {
+      console.log('Auth complete event received');
+      setForceUpdate(prev => prev + 1);
+    };
+    window.addEventListener('auth_complete', handleAuthComplete);
+    return () => window.removeEventListener('auth_complete', handleAuthComplete);
+  }, []);
+
+  // Check for redirect completion
+  React.useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.has('code')) {
+      console.log('Processing authentication code...', {
+        code: params.get('code')?.substring(0, 8) + '...',
+        state: params.get('state'),
+        error: params.get('error'),
+        errorDescription: params.get('error_description'),
+        timestamp: new Date().toISOString()
+      });
+    }
+  }, []);
+
+  // Handle sign in
+  const handleSignIn = async () => {
+    console.log('Initiating sign in...', {
+      timestamp: new Date().toISOString()
+    });
+    try {
+      await auth.signinRedirect({
+        redirect_uri: import.meta.env.VITE_COGNITO_REDIRECT_URI,
+        extraQueryParams: {
+          response_type: 'code',
+          client_id: import.meta.env.VITE_COGNITO_CLIENT_ID
+        }
+      });
+    } catch (error) {
+      console.error('Sign in error:', error);
+    }
+  };
 
   const handleSignOut = async () => {
     try {
+      console.log('Initiating sign out...', {
+        timestamp: new Date().toISOString()
+      });
       // First, remove the user locally
       await auth.removeUser();
-      // Clear any local storage tokens
-      localStorage.clear();
       
       // Build the logout URL with all required parameters
       const params = new URLSearchParams({
@@ -83,7 +144,7 @@ export default function MainLayout() {
                     </div>
                   ) : (
                     <button
-                      onClick={() => auth.signinRedirect()}
+                      onClick={handleSignIn}
                       className="text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium"
                     >
                       Sign in
@@ -132,7 +193,7 @@ export default function MainLayout() {
                   </>
                 ) : (
                   <button
-                    onClick={() => auth.signinRedirect()}
+                    onClick={handleSignIn}
                     className="text-gray-300 hover:bg-gray-700 hover:text-white w-full text-left rounded-md px-3 py-2 text-base font-medium"
                   >
                     Sign in
