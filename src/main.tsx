@@ -20,6 +20,15 @@ const cognitoAuthConfig = {
   loadUserInfo: false,
   monitorSession: false,
   storeAuthStateInCookie: false,
+  loadMetadata: false,
+  metadata: {
+    issuer: import.meta.env.VITE_COGNITO_DOMAIN,
+    authorization_endpoint: `${import.meta.env.VITE_COGNITO_DOMAIN}/oauth2/authorize`,
+    token_endpoint: `${import.meta.env.VITE_COGNITO_DOMAIN}/oauth2/token`,
+    end_session_endpoint: `${import.meta.env.VITE_COGNITO_DOMAIN}/oauth2/logout`,
+    jwks_uri: `${import.meta.env.VITE_COGNITO_DOMAIN}/.well-known/jwks.json`,
+    token_endpoint_auth_methods_supported: ["none"]
+  },
   userStore: new WebStorageStateStore({
     store: window.localStorage,
     prefix: "cognito."
