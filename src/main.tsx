@@ -18,35 +18,12 @@ const cognitoAuthConfig = {
   response_type: "code",
   scope: "openid email profile",
   loadUserInfo: false,
-  skipUserInfo: true,
-  monitorSession: true,
-  storeAuthStateInCookie: true,
-  loadMetadata: false,
-  automaticSilentRenew: true,
-  validateSubOnSilentRenew: false,
-  silentRequestTimeout: 10000,
-  includeIdTokenInSilentRenew: true,
-  metadata: {
-    issuer: import.meta.env.VITE_COGNITO_DOMAIN,
-    authorization_endpoint: `${import.meta.env.VITE_COGNITO_DOMAIN}/oauth2/authorize`,
-    token_endpoint: `${import.meta.env.VITE_COGNITO_DOMAIN}/oauth2/token`,
-    end_session_endpoint: `${import.meta.env.VITE_COGNITO_DOMAIN}/oauth2/logout`,
-    jwks_uri: `${import.meta.env.VITE_COGNITO_DOMAIN}/.well-known/jwks.json`
-  },
+  monitorSession: false,
+  storeAuthStateInCookie: false,
   userStore: new WebStorageStateStore({
     store: window.localStorage,
     prefix: "cognito."
   }),
-  validateMetadataUrl: false,
-  extraTokenParams: {
-    client_id: import.meta.env.VITE_COGNITO_CLIENT_ID
-  },
-  extraQueryParams: {
-    response_type: "code",
-    client_id: import.meta.env.VITE_COGNITO_CLIENT_ID
-  },
-  clockSkew: 300,
-  staleStateAge: 28800,
   onSigninCallback: (_user: User | void) => {
     console.log('Sign-in callback executed', {
       location: window.location.href,
@@ -94,16 +71,13 @@ const cognitoAuthConfig = {
   }
 };
 
-// Enhanced debug logging
-const debugConfig = {
+// Debug logging
+console.log('Auth Config:', {
   authority: cognitoAuthConfig.authority,
   redirect_uri: cognitoAuthConfig.redirect_uri,
   client_id: import.meta.env.VITE_COGNITO_CLIENT_ID,
-  scope: cognitoAuthConfig.scope,
-  metadata: cognitoAuthConfig.metadata
-};
-
-console.log('Auth Config:', debugConfig);
+  scope: cognitoAuthConfig.scope
+});
 
 // Add global error handler for uncaught promise rejections
 window.addEventListener('unhandledrejection', function(event) {
