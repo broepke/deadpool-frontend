@@ -17,21 +17,36 @@ const cognitoAuthConfig = {
   post_logout_redirect_uri: import.meta.env.VITE_COGNITO_LOGOUT_URI,
   response_type: "code",
   scope: "openid email profile",
-  loadUserInfo: true,
+  loadUserInfo: false,
+  skipUserInfo: true,
   monitorSession: true,
   storeAuthStateInCookie: true,
-  userStore: new WebStorageStateStore({ 
+  loadMetadata: false,
+  automaticSilentRenew: true,
+  validateSubOnSilentRenew: false,
+  silentRequestTimeout: 10000,
+  includeIdTokenInSilentRenew: true,
+  metadata: {
+    issuer: import.meta.env.VITE_COGNITO_DOMAIN,
+    authorization_endpoint: `${import.meta.env.VITE_COGNITO_DOMAIN}/oauth2/authorize`,
+    token_endpoint: `${import.meta.env.VITE_COGNITO_DOMAIN}/oauth2/token`,
+    end_session_endpoint: `${import.meta.env.VITE_COGNITO_DOMAIN}/oauth2/logout`,
+    jwks_uri: `${import.meta.env.VITE_COGNITO_DOMAIN}/.well-known/jwks.json`
+  },
+  userStore: new WebStorageStateStore({
     store: window.localStorage,
     prefix: "cognito."
   }),
-  metadataSeed: {
-    issuer: import.meta.env.VITE_COGNITO_DOMAIN,
-    authorization_endpoint: `${import.meta.env.VITE_COGNITO_DOMAIN}/login`,
-    token_endpoint: `${import.meta.env.VITE_COGNITO_DOMAIN}/oauth2/token`,
-    userinfo_endpoint: `${import.meta.env.VITE_COGNITO_DOMAIN}/oauth2/userInfo`,
-    end_session_endpoint: `${import.meta.env.VITE_COGNITO_DOMAIN}/logout`,
-    jwks_uri: `${import.meta.env.VITE_COGNITO_DOMAIN}/.well-known/jwks.json`
+  validateMetadataUrl: false,
+  extraTokenParams: {
+    client_id: import.meta.env.VITE_COGNITO_CLIENT_ID
   },
+  extraQueryParams: {
+    response_type: "code",
+    client_id: import.meta.env.VITE_COGNITO_CLIENT_ID
+  },
+  clockSkew: 300,
+  staleStateAge: 28800,
   onSigninCallback: (_user: User | void) => {
     console.log('Sign-in callback executed', {
       location: window.location.href,
@@ -85,7 +100,7 @@ const debugConfig = {
   redirect_uri: cognitoAuthConfig.redirect_uri,
   client_id: import.meta.env.VITE_COGNITO_CLIENT_ID,
   scope: cognitoAuthConfig.scope,
-  metadataSeed: cognitoAuthConfig.metadataSeed
+  metadata: cognitoAuthConfig.metadata
 };
 
 console.log('Auth Config:', debugConfig);
