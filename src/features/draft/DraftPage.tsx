@@ -4,6 +4,7 @@ import { draftApi } from '../../api/services/draft';
 import { picksApi } from '../../api/services/picks';
 import { PickDetail } from '../../api/types';
 import { LoadingSpinner } from '../../components/common/LoadingSpinner';
+import { isValidCelebrityName, sanitizeCelebrityName } from '../../utils/validation';
 
 export default function DraftPage() {
   const auth = useAuth();
@@ -13,6 +14,7 @@ export default function DraftPage() {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [validationError, setValidationError] = useState<string | null>(null);
   const currentYear = new Date().getFullYear();
 
   const loadPicks = async () => {
@@ -55,17 +57,38 @@ export default function DraftPage() {
     loadInitialData();
   }, []);
 
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setCurrentPick(value);
+    
+    // Clear previous validation errors
+    setValidationError(null);
+    
+    // Validate input as user types
+    if (value.trim() && !isValidCelebrityName(value)) {
+      setValidationError('Please use only letters, spaces, hyphens, and apostrophes');
+    }
+  };
+
   const handleSubmitPick = async () => {
     if (!currentPick.trim() || !currentDrafter) return;
+    
+    // Sanitize and validate the input
+    const sanitizedName = sanitizeCelebrityName(currentPick);
+    if (!isValidCelebrityName(sanitizedName)) {
+      setValidationError('Celebrity name contains invalid characters. Please use only letters, spaces, hyphens, and apostrophes.');
+      return;
+    }
     
     setIsSubmitting(true);
     try {
       await draftApi.draftPerson({
-        name: currentPick.trim(),
+        name: sanitizedName,
         player_id: currentDrafter.id
       });
       
       setCurrentPick('');
+      setValidationError(null);
       // Fetch the next drafter after successful submission
       await fetchNextDrafter();
       
@@ -151,11 +174,23 @@ export default function DraftPage() {
                         type="text"
                         name="celebrity"
                         id="celebrity"
-                        className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                        className={`block w-full rounded-md shadow-sm sm:text-sm ${
+                          validationError 
+                            ? 'border-red-300 focus:border-red-500 focus:ring-red-500' 
+                            : 'border-gray-300 focus:border-blue-500 focus:ring-blue-500'
+                        }`}
                         value={currentPick}
-                        onChange={(e) => setCurrentPick(e.target.value)}
+                        onChange={handleInputChange}
                         placeholder="Enter celebrity name"
                       />
+                      {validationError && (
+                        <p className="mt-1 text-sm text-red-600">
+                          {validationError}
+                        </p>
+                      )}
+                      <p className="mt-1 text-sm text-gray-500">
+                        Use only letters, spaces, hyphens, and apostrophes
+                      </p>
                     </div>
                   </div>
                   <div className="mt-4">
@@ -163,7 +198,7 @@ export default function DraftPage() {
                       type="button"
                       className="btn btn-primary w-full flex justify-center items-center"
                       onClick={handleSubmitPick}
-                      disabled={!currentPick.trim() || isSubmitting}
+                      disabled={!currentPick.trim() || isSubmitting || !!validationError}
                     >
                       {isSubmitting ? (
                         <>
