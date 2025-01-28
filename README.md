@@ -1,4 +1,4 @@
-# DeadPool - Celebrity Draft Game Frontend
+# Deadpool - Celebrity Draft Game Frontend
 
 A web application for managing a celebrity draft game where players pick celebrities and score points based on outcomes throughout the year.
 
