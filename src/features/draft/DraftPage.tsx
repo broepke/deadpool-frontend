@@ -3,6 +3,7 @@ import { useAuth } from "react-oidc-context";
 import { draftApi } from '../../api/services/draft';
 import { picksApi } from '../../api/services/picks';
 import { PickDetail } from '../../api/types';
+import { LoadingSpinner } from '../../components/common/LoadingSpinner';
 
 export default function DraftPage() {
   const auth = useAuth();
@@ -10,6 +11,8 @@ export default function DraftPage() {
   const [currentPick, setCurrentPick] = useState('');
   const [currentDrafter, setCurrentDrafter] = useState<{ id: string; name: string } | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const currentYear = new Date().getFullYear();
 
   const loadPicks = async () => {
@@ -39,10 +42,15 @@ export default function DraftPage() {
 
   useEffect(() => {
     const loadInitialData = async () => {
-      await Promise.all([
-        fetchNextDrafter(),
-        loadPicks()
-      ]);
+      setIsLoading(true);
+      try {
+        await Promise.all([
+          fetchNextDrafter(),
+          loadPicks()
+        ]);
+      } finally {
+        setIsLoading(false);
+      }
     };
     loadInitialData();
   }, []);
@@ -50,6 +58,7 @@ export default function DraftPage() {
   const handleSubmitPick = async () => {
     if (!currentPick.trim() || !currentDrafter) return;
     
+    setIsSubmitting(true);
     try {
       await draftApi.draftPerson({
         name: currentPick.trim(),
@@ -58,15 +67,25 @@ export default function DraftPage() {
       
       setCurrentPick('');
       // Fetch the next drafter after successful submission
-      fetchNextDrafter();
+      await fetchNextDrafter();
       
       // Reload the picks to show the updated history
       await loadPicks();
     } catch (err) {
       setError('Failed to submit pick');
       console.error(err);
+    } finally {
+      setIsSubmitting(false);
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center min-h-[400px]">
+        <LoadingSpinner size="lg" />
+      </div>
+    );
+  }
 
   return (
     <div>
@@ -142,11 +161,18 @@ export default function DraftPage() {
                   <div className="mt-4">
                     <button
                       type="button"
-                      className="btn btn-primary w-full"
+                      className="btn btn-primary w-full flex justify-center items-center"
                       onClick={handleSubmitPick}
-                      disabled={!currentPick.trim()}
+                      disabled={!currentPick.trim() || isSubmitting}
                     >
-                      Draft {currentPick.trim() || 'Celebrity'}
+                      {isSubmitting ? (
+                        <>
+                          <LoadingSpinner size="sm" className="mr-2" />
+                          Submitting...
+                        </>
+                      ) : (
+                        `Draft ${currentPick.trim() || 'Celebrity'}`
+                      )}
                     </button>
                   </div>
                 </div>

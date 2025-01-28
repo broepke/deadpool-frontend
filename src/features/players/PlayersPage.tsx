@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { playersApi } from '../../api';
 import { Player } from '../../api/types';
+import { LoadingSpinner } from '../../components/common/LoadingSpinner';
 
 export default function PlayersPage() {
   const [players, setPlayers] = useState<Player[]>([]);
@@ -48,7 +49,9 @@ export default function PlayersPage() {
       </div>
       
       {loading ? (
-        <div className="mt-8 text-center">Loading players...</div>
+        <div className="flex justify-center items-center min-h-[200px] mt-8">
+          <LoadingSpinner size="lg" />
+        </div>
       ) : error ? (
         <div className="mt-8 text-center text-red-600">{error}</div>
       ) : (

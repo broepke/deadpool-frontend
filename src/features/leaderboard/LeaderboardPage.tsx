@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { leaderboardApi } from '../../api';
 import { LeaderboardEntry } from '../../api/types';
+import { LoadingSpinner } from '../../components/common/LoadingSpinner';
 
 const AVAILABLE_YEARS = [2025, 2024, 2023];
 
@@ -53,7 +54,9 @@ export default function LeaderboardPage() {
       </div>
 
       {loading ? (
-        <div className="mt-8 text-center">Loading leaderboard...</div>
+        <div className="flex justify-center items-center min-h-[200px] mt-8">
+          <LoadingSpinner size="lg" />
+        </div>
       ) : error ? (
         <div className="mt-8 text-center text-red-600">{error}</div>
       ) : (
