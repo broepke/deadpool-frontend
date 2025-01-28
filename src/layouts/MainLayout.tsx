@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link, Outlet, useNavigate } from 'react-router-dom';
+import { Link, Outlet } from 'react-router-dom';
 import { Disclosure, Menu, Transition } from '@headlessui/react';
 import { Bars3Icon, XMarkIcon, UserCircleIcon } from '@heroicons/react/24/outline';
 import { useAuth } from 'react-oidc-context';
@@ -13,7 +13,6 @@ const navigation = [
 
 export default function MainLayout() {
   const auth = useAuth();
-  const navigate = useNavigate();
 
   const handleSignOut = async () => {
     try {

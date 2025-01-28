@@ -1,5 +1,5 @@
 import { useAuth } from 'react-oidc-context';
-import { Navigate, Outlet } from 'react-router-dom';
+import { Outlet } from 'react-router-dom';
 import { useEffect } from 'react';
 
 export default function AuthGuard() {
