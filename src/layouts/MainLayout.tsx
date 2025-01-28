@@ -17,9 +17,15 @@ export default function MainLayout() {
   const handleSignOut = () => {
     const clientId = import.meta.env.VITE_COGNITO_CLIENT_ID;
     const logoutUri = import.meta.env.VITE_COGNITO_LOGOUT_URI;
-    const cognitoDomain = 'https://us-east-1hprezmo06.auth.us-east-1.amazoncognito.com';
+    const cognitoDomain = import.meta.env.VITE_COGNITO_DOMAIN;
+    const authority = import.meta.env.VITE_COGNITO_AUTHORITY;
     
-    // First remove the user from local state
+    // Clear OIDC tokens from localStorage and sessionStorage
+    const oidcKey = `oidc.user:${authority}:${clientId}`;
+    localStorage.removeItem(oidcKey);
+    sessionStorage.removeItem(oidcKey);
+    
+    // Remove user from local state
     auth.removeUser();
     
     // Then redirect to Cognito logout
