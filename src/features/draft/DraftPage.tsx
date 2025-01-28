@@ -6,7 +6,6 @@ import { PickDetail } from '../../api/types';
 
 export default function DraftPage() {
   const auth = useAuth();
-  const [draftStatus, setDraftStatus] = useState<'not_started' | 'in_progress' | 'completed'>('not_started');
   const [picks, setPicks] = useState<PickDetail[]>([]);
   const [currentPick, setCurrentPick] = useState('');
   const [currentDrafter, setCurrentDrafter] = useState<{ id: string; name: string } | null>(null);
@@ -31,7 +30,6 @@ export default function DraftPage() {
           id: response.data.player_id,
           name: response.data.player_name
         });
-        setDraftStatus('in_progress');
       }
     } catch (err) {
       setError('Failed to fetch next drafter');
@@ -48,10 +46,6 @@ export default function DraftPage() {
     };
     loadInitialData();
   }, []);
-
-  const handleStartDraft = () => {
-    fetchNextDrafter();
-  };
 
   const handleSubmitPick = async () => {
     if (!currentPick.trim() || !currentDrafter) return;
@@ -83,17 +77,6 @@ export default function DraftPage() {
             Make your celebrity picks in turn order.
           </p>
         </div>
-        {draftStatus === 'not_started' && (
-          <div className="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
-            <button
-              type="button"
-              className="btn btn-primary"
-              onClick={handleStartDraft}
-            >
-              Start Draft
-            </button>
-          </div>
-        )}
       </div>
 
       <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
@@ -115,28 +98,15 @@ export default function DraftPage() {
 
         {/* Draft Status and Current Turn */}
         <div className="card">
-          <h2 className="text-lg font-medium text-gray-900">Draft Status</h2>
+          <h2 className="text-lg font-medium text-gray-900">Current Turn</h2>
           <div className="mt-4">
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-gray-500">Status:</span>
-              <span className={`inline-flex rounded-full px-2 text-xs font-semibold leading-5 ${
-                draftStatus === 'completed' ? 'bg-green-100 text-green-800' :
-                draftStatus === 'in_progress' ? 'bg-blue-100 text-blue-800' :
-                'bg-gray-100 text-gray-800'
-              }`}>
-                {draftStatus.replace('_', ' ').toUpperCase()}
-              </span>
-            </div>
-            {draftStatus === 'in_progress' && currentDrafter && (
-              <div className="mt-4">
-                <h3 className="text-sm font-medium text-gray-900">Current Turn</h3>
-                <div className="mt-2 p-4 rounded-md bg-blue-50 border border-blue-200">
-                  <div className="flex items-center justify-between">
-                    <span className="text-lg font-medium text-blue-900">{currentDrafter.name}</span>
-                    <span className="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-sm font-medium text-blue-800">
-                      Current Drafter
-                    </span>
-                  </div>
+            {currentDrafter && (
+              <div className="mt-2 p-4 rounded-md bg-blue-50 border border-blue-200">
+                <div className="flex items-center justify-between">
+                  <span className="text-lg font-medium text-blue-900">{currentDrafter.name}</span>
+                  <span className="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-sm font-medium text-blue-800">
+                    Current Drafter
+                  </span>
                 </div>
               </div>
             )}
@@ -144,7 +114,7 @@ export default function DraftPage() {
         </div>
 
         {/* Pick Submission */}
-        {draftStatus === 'in_progress' && currentDrafter && (
+        {currentDrafter && (
           <div className="card">
             <h2 className="text-lg font-medium text-gray-900">Make Your Pick</h2>
             {auth.user?.profile.sub === currentDrafter.id ? (
