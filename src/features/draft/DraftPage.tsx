@@ -199,7 +199,7 @@ export default function DraftPage() {
                         </p>
                       )}
                       <p className="mt-1 text-sm text-gray-500">
-                        Allowed characters: letters, numbers (for suffixes like "III"), spaces, and basic punctuation (hyphens, apostrophes, periods, commas, parentheses)
+                        Allowed characters: letters, numbers, spaces, and basic punctuation.
                       </p>
                     </div>
                   </div>
