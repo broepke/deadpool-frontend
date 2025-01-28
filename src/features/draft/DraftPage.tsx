@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
+import { useAuth } from "react-oidc-context";
 import { draftApi } from '../../api/services/draft';
 import { picksApi } from '../../api/services/picks';
 import { PickDetail } from '../../api/types';
 
 export default function DraftPage() {
+  const auth = useAuth();
   const [draftStatus, setDraftStatus] = useState<'not_started' | 'in_progress' | 'completed'>('not_started');
   const [picks, setPicks] = useState<PickDetail[]>([]);
   const [currentPick, setCurrentPick] = useState('');
@@ -145,37 +147,45 @@ export default function DraftPage() {
         {draftStatus === 'in_progress' && currentDrafter && (
           <div className="card">
             <h2 className="text-lg font-medium text-gray-900">Make Your Pick</h2>
-            <p className="mt-2 text-sm text-gray-600">
-              It's {currentDrafter.name}'s turn to draft a celebrity.
-            </p>
-            <div className="mt-4">
-              <div>
-                <label htmlFor="celebrity" className="block text-sm font-medium text-gray-700">
-                  Celebrity Name
-                </label>
-                <div className="mt-1">
-                  <input
-                    type="text"
-                    name="celebrity"
-                    id="celebrity"
-                    className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                    value={currentPick}
-                    onChange={(e) => setCurrentPick(e.target.value)}
-                    placeholder="Enter celebrity name"
-                  />
+            {auth.user?.profile.sub === currentDrafter.id ? (
+              <>
+                <p className="mt-2 text-sm text-gray-600">
+                  It's your turn to draft a celebrity.
+                </p>
+                <div className="mt-4">
+                  <div>
+                    <label htmlFor="celebrity" className="block text-sm font-medium text-gray-700">
+                      Celebrity Name
+                    </label>
+                    <div className="mt-1">
+                      <input
+                        type="text"
+                        name="celebrity"
+                        id="celebrity"
+                        className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                        value={currentPick}
+                        onChange={(e) => setCurrentPick(e.target.value)}
+                        placeholder="Enter celebrity name"
+                      />
+                    </div>
+                  </div>
+                  <div className="mt-4">
+                    <button
+                      type="button"
+                      className="btn btn-primary w-full"
+                      onClick={handleSubmitPick}
+                      disabled={!currentPick.trim()}
+                    >
+                      Draft {currentPick.trim() || 'Celebrity'}
+                    </button>
+                  </div>
                 </div>
-              </div>
-              <div className="mt-4">
-                <button
-                  type="button"
-                  className="btn btn-primary w-full"
-                  onClick={handleSubmitPick}
-                  disabled={!currentPick.trim()}
-                >
-                  Draft {currentPick.trim() || 'Celebrity'}
-                </button>
-              </div>
-            </div>
+              </>
+            ) : (
+              <p className="mt-2 text-sm text-gray-600">
+                Waiting for {currentDrafter.name} to make their pick...
+              </p>
+            )}
           </div>
         )}
       </div>
