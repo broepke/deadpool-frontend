@@ -2,12 +2,15 @@
  * Regular expression for validating celebrity names
  * Allows:
  * - Letters (a-z, A-Z)
+ * - Numbers (0-9) for suffixes like "III" or "2nd"
  * - Spaces
- * - Hyphens
- * - Apostrophes
- * - Periods
+ * - Hyphens (for compound names like "Jean-Paul")
+ * - Apostrophes (for names like "O'Brien")
+ * - Periods (for "Jr." or "Sr.")
+ * - Commas (for "Smith, Jr.")
+ * - Parentheses (for stage names/aliases like "The Rock (Dwayne Johnson)")
  */
-export const VALID_NAME_REGEX = /^[a-zA-Z\s\-'.]+$/;
+export const VALID_NAME_REGEX = /^[a-zA-Z0-9\s\-'.,()]+$/;
 
 /**
  * Validates if a celebrity name contains only allowed characters
@@ -21,6 +24,7 @@ export function isValidCelebrityName(name: string): boolean {
  * - Normalizing Unicode characters
  * - Removing control characters
  * - Standardizing whitespace
+ * - Preserving valid name characters
  */
 export function sanitizeCelebrityName(name: string): string {
   return name

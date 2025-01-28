@@ -74,7 +74,7 @@ export default function DraftPage() {
     
     // Validate input as user types
     if (value.trim() && !isValidCelebrityName(value)) {
-      setValidationError('Please use only letters, spaces, hyphens, and apostrophes');
+      setValidationError('Please use only letters, numbers, spaces, and basic punctuation (hyphens, apostrophes, periods, commas, parentheses)');
     }
   };
 
@@ -84,7 +84,7 @@ export default function DraftPage() {
     // Sanitize and validate the input
     const sanitizedName = sanitizeCelebrityName(currentPick);
     if (!isValidCelebrityName(sanitizedName)) {
-      setValidationError('Celebrity name contains invalid characters. Please use only letters, spaces, hyphens, and apostrophes.');
+      setValidationError('Celebrity name contains invalid characters. Please use only letters, numbers, spaces, and basic punctuation (hyphens, apostrophes, periods, commas, parentheses).');
       return;
     }
     
@@ -102,8 +102,10 @@ export default function DraftPage() {
       
       // Reload the picks to show the updated history
       await loadPicks();
-    } catch (err) {
-      setError('Failed to submit pick');
+    } catch (err: any) {
+      // Extract the detailed error message if available
+      const errorMessage = err.response?.data?.detail || 'Failed to submit pick';
+      setError(errorMessage);
       console.error(err);
     } finally {
       setIsSubmitting(false);
@@ -197,7 +199,7 @@ export default function DraftPage() {
                         </p>
                       )}
                       <p className="mt-1 text-sm text-gray-500">
-                        Use only letters, spaces, hyphens, and apostrophes
+                        Allowed characters: letters, numbers (for suffixes like "III"), spaces, and basic punctuation (hyphens, apostrophes, periods, commas, parentheses)
                       </p>
                     </div>
                   </div>
