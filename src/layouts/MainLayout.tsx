@@ -17,22 +17,17 @@ export default function MainLayout() {
 
   const handleSignOut = async () => {
     try {
-      // First remove the user from the auth context
-      await auth.removeUser();
-      
-      // Clear any local storage items
-      localStorage.clear();
-      sessionStorage.clear();
-
-      // Construct the Cognito logout URL with all necessary parameters
+      await auth.signoutRedirect({
+        post_logout_redirect_uri: import.meta.env.VITE_COGNITO_LOGOUT_URI,
+        id_token_hint: auth.user?.id_token
+      });
+    } catch (error) {
+      console.error('Logout error:', error);
+      // Fallback to manual redirect if signoutRedirect fails
       const logoutUri = import.meta.env.VITE_COGNITO_LOGOUT_URI;
       const clientId = import.meta.env.VITE_COGNITO_CLIENT_ID;
       const cognitoDomain = import.meta.env.VITE_COGNITO_DOMAIN;
-      
-      // Redirect to Cognito's logout endpoint
-      window.location.href = `${cognitoDomain}/oauth2/logout?client_id=${clientId}&logout_uri=${encodeURIComponent(logoutUri)}&response_type=code`;
-    } catch (error) {
-      console.error('Logout error:', error);
+      window.location.href = `${cognitoDomain}/oauth2/logout?client_id=${clientId}&logout_uri=${encodeURIComponent(logoutUri)}`;
     }
   };
 
