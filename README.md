@@ -19,7 +19,7 @@ A web application for managing a celebrity draft game where players pick celebri
 
 ## Project Structure
 
-```
+```text
 src/
 ├── components/        # Reusable UI components
 ├── features/         # Feature-specific components
@@ -34,36 +34,41 @@ src/
 ## Development
 
 1. Install dependencies:
-```bash
-npm install
-```
 
-2. Start development server:
-```bash
-npm run dev
-```
+    ```bash
+    npm install
+    ```
 
-3. Build for production:
-```bash
-npm run build
-```
+1. Start development server:
+
+    ```bash
+    npm run dev
+    ```
+
+1. Build for production:
+
+    ```bash
+    npm run build
+    ```
 
 ## Deployment
 
 This application is designed to be hosted on AWS S3 as a static website. To deploy:
 
 1. Build the application:
-```bash
-npm run build
-```
 
-2. Upload the contents of the `dist` directory to your S3 bucket
-3. Configure the S3 bucket for static website hosting
-4. Set up CloudFront distribution (recommended for HTTPS and better performance)
+    ```bash
+    npm run build
+    ```
+
+1. Upload the contents of the `dist` directory to your S3 bucket
+1. Configure the S3 bucket for static website hosting
+1. Set up CloudFront distribution (recommended for HTTPS and better performance)
 
 ## Backend Integration
 
 The frontend is designed to work with a serverless backend built with:
+
 - AWS Lambda
 - API Gateway
 - DynamoDB
@@ -73,11 +78,10 @@ API endpoints will be configured in a separate environment configuration file wh
 ## Contributing
 
 1. Fork the repository
-2. Create a feature branch
-3. Commit your changes
-4. Push to the branch
-5. Create a Pull Request
-
+1. Create a feature branch
+1. Commit your changes
+1. Push to the branch
+1. Create a Pull Request
 
 ## Deploy Production
 
@@ -92,5 +96,3 @@ Deployment to AWS using npm run deploy:prod
 ```bash
 npm install oidc-client-ts react-oidc-context --save
 ```
-
-
