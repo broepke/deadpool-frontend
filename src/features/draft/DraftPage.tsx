@@ -227,7 +227,10 @@ export default function DraftPage() {
                       {pick.pick_person_name || 'N/A'}
                     </td>
                     <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                      {pick.pick_timestamp ? new Date(pick.pick_timestamp).toLocaleTimeString() : 'N/A'}
+                      {pick.pick_timestamp ? new Date(pick.pick_timestamp + 'Z').toLocaleString(undefined, {
+                        dateStyle: 'short',
+                        timeStyle: 'short'
+                      }) : 'N/A'}
                     </td>
                   </tr>
                 ))
