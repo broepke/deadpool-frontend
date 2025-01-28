@@ -14,15 +14,15 @@ const cognitoAuthConfig = {
   userStore: new WebStorageStateStore({ store: window.localStorage }),
   loadUserInfo: true,
   onSigninCallback: () => {
-    // Remove the query parameters after successful login
     window.history.replaceState({}, document.title, window.location.pathname);
   },
   metadata: {
     issuer: import.meta.env.VITE_COGNITO_AUTHORITY,
     authorization_endpoint: `${import.meta.env.VITE_COGNITO_DOMAIN}/oauth2/authorize`,
     token_endpoint: `${import.meta.env.VITE_COGNITO_DOMAIN}/oauth2/token`,
-    end_session_endpoint: `${import.meta.env.VITE_COGNITO_DOMAIN}/logout`,
-    userinfo_endpoint: `${import.meta.env.VITE_COGNITO_DOMAIN}/oauth2/userInfo`
+    end_session_endpoint: `${import.meta.env.VITE_COGNITO_DOMAIN}/oauth2/logout`,
+    userinfo_endpoint: `${import.meta.env.VITE_COGNITO_DOMAIN}/oauth2/userInfo`,
+    jwks_uri: `${import.meta.env.VITE_COGNITO_AUTHORITY}/.well-known/jwks.json`
   }
 };
 
