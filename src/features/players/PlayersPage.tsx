@@ -28,24 +28,11 @@ export default function PlayersPage() {
 
   return (
     <div>
-      <div className="sm:flex sm:items-center">
-        <div className="sm:flex-auto">
-          <h1 className="text-2xl font-semibold text-gray-900">Players</h1>
-          <p className="mt-2 text-sm text-gray-700">
-            A list of all players participating in the game.
-          </p>
-        </div>
-        <div className="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
-          <button
-            type="button"
-            className="btn btn-primary"
-            onClick={() => {
-              // TODO: Implement add player functionality
-            }}
-          >
-            Add Player
-          </button>
-        </div>
+      <div>
+        <h1 className="text-2xl font-semibold text-gray-900">Players</h1>
+        <p className="mt-2 text-sm text-gray-700">
+          A list of all players participating in the game.
+        </p>
       </div>
       
       {loading ? (
@@ -71,15 +58,12 @@ export default function PlayersPage() {
                       <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
                         Year
                       </th>
-                      <th scope="col" className="relative py-3.5 pl-3 pr-4 sm:pr-6">
-                        <span className="sr-only">Actions</span>
-                      </th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-200 bg-white">
                     {players.length === 0 ? (
                       <tr>
-                        <td colSpan={4} className="text-center py-4 text-sm text-gray-500">
+                        <td colSpan={3} className="text-center py-4 text-sm text-gray-500">
                           No players added yet.
                         </td>
                       </tr>
@@ -94,24 +78,6 @@ export default function PlayersPage() {
                           </td>
                           <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                             {player.year}
-                          </td>
-                          <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
-                            <button
-                              onClick={() => {
-                                // TODO: Implement edit functionality
-                              }}
-                              className="text-blue-600 hover:text-blue-900 mr-4"
-                            >
-                              Edit
-                            </button>
-                            <button
-                              onClick={() => {
-                                // TODO: Implement delete functionality
-                              }}
-                              className="text-red-600 hover:text-red-900"
-                            >
-                              Delete
-                            </button>
                           </td>
                         </tr>
                       ))

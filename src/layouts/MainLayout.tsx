@@ -91,8 +91,8 @@ export default function MainLayout() {
                       leaveFrom="transform opacity-100 scale-100"
                       leaveTo="transform opacity-0 scale-95"
                     >
-                      <Menu.Items className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
-                        <div className="px-4 py-2 text-sm text-gray-700 border-b">
+                      <Menu.Items className="absolute right-0 z-10 mt-2 min-w-[12rem] max-w-xs origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                        <div className="px-4 py-2 text-sm text-gray-700 border-b truncate" title={auth.user?.profile.email}>
                           {auth.user?.profile.email}
                         </div>
                         <Menu.Item>
@@ -151,8 +151,8 @@ export default function MainLayout() {
               <div className="border-t border-gray-700 pb-3 pt-4">
                 <div className="flex items-center px-5">
                   <div className="ml-3">
-                    <div className="text-base font-medium leading-none text-white">
-                      {auth.user?.profile.email}
+                    <div className="text-base font-medium leading-none text-white truncate max-w-[calc(100vw-4rem)]" title={auth.user?.profile.email}>
+                       {auth.user?.profile.email}
                     </div>
                   </div>
                 </div>
