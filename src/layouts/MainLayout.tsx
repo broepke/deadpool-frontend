@@ -14,22 +14,38 @@ const navigation = [
 export default function MainLayout() {
   const auth = useAuth();
 
-  const handleSignOut = () => {
+  const handleSignOut = async () => {
     const clientId = import.meta.env.VITE_COGNITO_CLIENT_ID;
     const logoutUri = import.meta.env.VITE_COGNITO_LOGOUT_URI;
     const cognitoDomain = import.meta.env.VITE_COGNITO_DOMAIN;
     const authority = import.meta.env.VITE_COGNITO_AUTHORITY;
     
-    // Clear OIDC tokens from localStorage and sessionStorage
-    const oidcKey = `oidc.user:${authority}:${clientId}`;
-    localStorage.removeItem(oidcKey);
-    sessionStorage.removeItem(oidcKey);
-    
-    // Remove user from local state
-    auth.removeUser();
-    
-    // Then redirect to Cognito logout
-    window.location.href = `${cognitoDomain}/logout?client_id=${clientId}&logout_uri=${encodeURIComponent(logoutUri)}`;
+    try {
+      // First remove user from auth context to prevent any authenticated requests
+      auth.removeUser();
+
+      // Clear OIDC tokens from localStorage and sessionStorage
+      const oidcKey = `oidc.user:${authority}:${clientId}`;
+      localStorage.removeItem(oidcKey);
+      sessionStorage.removeItem(oidcKey);
+
+      // Clear all cookies by setting their expiration to the past
+      document.cookie.split(';').forEach(cookie => {
+        document.cookie = cookie
+          .replace(/^ +/, '')
+          .replace(/=.*/, `=;expires=${new Date().toUTCString()};path=/`);
+      });
+      
+      // Small delay to ensure cleanup is complete
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      // Finally redirect to Cognito logout
+      window.location.href = `${cognitoDomain}/logout?client_id=${clientId}&logout_uri=${encodeURIComponent(logoutUri)}`;
+    } catch (error) {
+      console.error('Error during sign out:', error);
+      // Fallback: force reload to clear everything
+      window.location.reload();
+    }
   };
 
   return (
