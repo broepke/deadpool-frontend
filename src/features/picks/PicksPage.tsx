@@ -16,7 +16,24 @@ export default function PicksPage() {
       try {
         setLoading(true);
         const response = await picksApi.getAll(selectedYear);
-        setPicks(response.data);
+        
+        // Create a new array with parsed dates for sorting
+        const picksWithParsedDates = response.data.map(pick => ({
+          ...pick,
+          parsedDate: pick.pick_timestamp ? new Date(pick.pick_timestamp + 'Z') : null
+        }));
+
+        // Sort by parsed dates and limit to 10
+        const sortedPicks = picksWithParsedDates
+          .sort((a, b) => {
+            if (!a.parsedDate) return 1;
+            if (!b.parsedDate) return -1;
+            return b.parsedDate.getTime() - a.parsedDate.getTime();
+          })
+          .slice(0, 10)
+          .map(({ parsedDate, ...pick }) => pick); // Remove the parsedDate field before setting state
+
+        setPicks(sortedPicks);
         setError(null);
       } catch (err) {
         console.error('Failed to fetch picks:', err);
@@ -31,7 +48,10 @@ export default function PicksPage() {
 
   const formatDate = (dateString: string | null) => {
     if (!dateString) return 'N/A';
-    return new Date(dateString).toLocaleDateString();
+    return new Date(dateString + 'Z').toLocaleString(undefined, {
+      dateStyle: 'short',
+      timeStyle: 'short'
+    });
   };
 
   return (
