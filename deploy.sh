@@ -19,6 +19,17 @@ if ! command -v aws &> /dev/null; then
   exit 1
 fi
 
+# Check required Amplify environment variables
+if [ -z "$AMPLIFY_APP_ID" ]; then
+  echo "❌ AMPLIFY_APP_ID is not set in .env.production"
+  exit 1
+fi
+
+if [ -z "$AMPLIFY_BRANCH" ]; then
+  echo "❌ AMPLIFY_BRANCH is not set in .env.production"
+  exit 1
+fi
+
 # Build the application
 echo "📦 Building application..."
 npm run build
@@ -35,5 +46,27 @@ aws s3 sync dist/ s3://$AWS_S3_BUCKET \
 aws s3 cp dist/index.html s3://$AWS_S3_BUCKET/index.html \
   --cache-control "no-cache,no-store,must-revalidate" \
   --region $AWS_REGION
+
+# Create a zip file of the build
+echo "📦 Creating deployment package..."
+cd dist
+zip -r ../deployment.zip ./*
+cd ..
+
+# Upload the zip to S3
+echo "📤 Uploading deployment package to S3..."
+aws s3 cp deployment.zip s3://$AWS_S3_BUCKET/deployments/deployment.zip \
+  --region $AWS_REGION
+
+# Trigger Amplify deployment
+echo "🔄 Triggering Amplify deployment..."
+aws amplify start-deployment \
+  --app-id $AMPLIFY_APP_ID \
+  --branch-name $AMPLIFY_BRANCH \
+  --source-url s3://$AWS_S3_BUCKET/deployments/deployment.zip \
+  --region $AWS_REGION
+
+# Clean up
+rm deployment.zip
 
 echo "✅ Deployment completed successfully!"
