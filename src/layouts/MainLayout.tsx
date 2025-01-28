@@ -14,20 +14,16 @@ const navigation = [
 export default function MainLayout() {
   const auth = useAuth();
 
-  const handleSignOut = async () => {
-    try {
-      await auth.signoutRedirect({
-        post_logout_redirect_uri: import.meta.env.VITE_COGNITO_LOGOUT_URI,
-        id_token_hint: auth.user?.id_token
-      });
-    } catch (error) {
-      console.error('Logout error:', error);
-      // Fallback to manual redirect if signoutRedirect fails
-      const logoutUri = import.meta.env.VITE_COGNITO_LOGOUT_URI;
-      const clientId = import.meta.env.VITE_COGNITO_CLIENT_ID;
-      const cognitoDomain = import.meta.env.VITE_COGNITO_DOMAIN;
-      window.location.href = `${cognitoDomain}/oauth2/logout?client_id=${clientId}&logout_uri=${encodeURIComponent(logoutUri)}`;
-    }
+  const handleSignOut = () => {
+    const clientId = import.meta.env.VITE_COGNITO_CLIENT_ID;
+    const logoutUri = import.meta.env.VITE_COGNITO_LOGOUT_URI;
+    const cognitoDomain = 'https://us-east-1hprezmo06.auth.us-east-1.amazoncognito.com';
+    
+    // First remove the user from local state
+    auth.removeUser();
+    
+    // Then redirect to Cognito logout
+    window.location.href = `${cognitoDomain}/logout?client_id=${clientId}&logout_uri=${encodeURIComponent(logoutUri)}`;
   };
 
   return (
