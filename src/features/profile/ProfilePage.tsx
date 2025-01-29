@@ -1,9 +1,25 @@
 import { useAuth } from "react-oidc-context";
+import { useEffect } from "react";
+import { useAnalytics } from "../../services/analytics/provider";
 
 export default function ProfilePage() {
   const auth = useAuth();
+  const analytics = useAnalytics();
+
+  useEffect(() => {
+    analytics.trackEvent('PROFILE_VIEW', {
+      is_authenticated: auth.isAuthenticated,
+      has_email: !!auth.user?.profile.email,
+      has_phone: !!auth.user?.profile.phone_number
+    });
+  }, [auth.isAuthenticated, auth.user?.profile, analytics]);
 
   if (!auth.isAuthenticated) {
+    analytics.trackEvent('AUTH_ERROR', {
+      error_type: 'unauthorized',
+      error_message: 'User not authenticated',
+      component: 'ProfilePage'
+    });
     return (
       <div className="text-center">
         <p className="text-gray-600">Please sign in to view your profile.</p>

@@ -1,8 +1,9 @@
-import React from 'react';
-import { Link, Outlet } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { Link, Outlet, useLocation } from 'react-router-dom';
 import { Disclosure, Menu, Transition } from '@headlessui/react';
 import { Bars3Icon, XMarkIcon, UserCircleIcon } from '@heroicons/react/24/outline';
 import { useAuth } from 'react-oidc-context';
+import { useAnalytics } from '../services/analytics/provider';
 
 const navigation = [
   { name: 'Players', href: '/players' },
@@ -13,8 +14,23 @@ const navigation = [
 
 export default function MainLayout() {
   const auth = useAuth();
+  const analytics = useAnalytics();
+  const location = useLocation();
+
+  // Track page views
+  useEffect(() => {
+    analytics.trackPageView({
+      path: location.pathname,
+      title: document.title
+    });
+  }, [location, analytics]);
 
   const handleSignOut = async () => {
+    // Track sign out event before clearing user data
+    analytics.trackEvent('USER_LOGOUT', {
+      email: auth.user?.profile.email
+    });
+
     const clientId = import.meta.env.VITE_COGNITO_CLIENT_ID;
     const logoutUri = import.meta.env.VITE_COGNITO_LOGOUT_URI;
     const cognitoDomain = import.meta.env.VITE_COGNITO_DOMAIN;

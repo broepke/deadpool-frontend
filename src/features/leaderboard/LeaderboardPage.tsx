@@ -1,15 +1,26 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { leaderboardApi } from '../../api';
 import { LeaderboardEntry } from '../../api/types';
 import { LoadingSpinner } from '../../components/common/LoadingSpinner';
+import { useAnalytics } from '../../services/analytics/provider';
 
 const AVAILABLE_YEARS = [2025, 2024, 2023];
 
 export default function LeaderboardPage() {
+  const analytics = useAnalytics();
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [selectedYear, setSelectedYear] = useState(2025);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const handleYearChange = useCallback((year: number) => {
+    analytics.trackEvent('LEADERBOARD_FILTER', {
+      filter_type: 'year',
+      value: year,
+      previous_value: selectedYear
+    });
+    setSelectedYear(year);
+  }, [analytics, selectedYear]);
 
   useEffect(() => {
     const fetchLeaderboard = async () => {
@@ -18,16 +29,33 @@ export default function LeaderboardPage() {
         const response = await leaderboardApi.getLeaderboard(selectedYear);
         setLeaderboard(response.data);
         setError(null);
+
+        // Track successful leaderboard load
+        analytics.trackEvent('LEADERBOARD_VIEW', {
+          year: selectedYear,
+          total_players: response.data.length,
+          has_data: response.data.length > 0,
+          top_score: response.data[0]?.score
+        });
       } catch (err) {
         console.error('Failed to fetch leaderboard:', err);
-        setError('Failed to load leaderboard. Please try again later.');
+        const errorMessage = 'Failed to load leaderboard. Please try again later.';
+        setError(errorMessage);
+
+        // Track error
+        analytics.trackEvent('ERROR_OCCURRED', {
+          error_type: 'api_error',
+          error_message: errorMessage,
+          endpoint: 'getLeaderboard',
+          year: selectedYear
+        });
       } finally {
         setLoading(false);
       }
     };
 
     fetchLeaderboard();
-  }, [selectedYear]);
+  }, [selectedYear, analytics]);
 
   return (
     <div>
@@ -41,8 +69,9 @@ export default function LeaderboardPage() {
         <div className="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
           <select
             value={selectedYear}
-            onChange={(e) => setSelectedYear(Number(e.target.value))}
+            onChange={(e) => handleYearChange(Number(e.target.value))}
             className="block w-full rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6"
+            aria-label="Select year"
           >
             {AVAILABLE_YEARS.map((year) => (
               <option key={year} value={year}>
@@ -83,6 +112,16 @@ export default function LeaderboardPage() {
                       <tr>
                         <td colSpan={3} className="text-center py-4 text-sm text-gray-500">
                           No players on the leaderboard yet.
+                          {/* Track empty state when rendered */}
+                          {(() => {
+                            analytics.trackEvent('LEADERBOARD_VIEW', {
+                              year: selectedYear,
+                              total_players: 0,
+                              has_data: false,
+                              state: 'empty'
+                            });
+                            return null;
+                          })()}
                         </td>
                       </tr>
                     ) : (

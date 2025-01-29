@@ -1,15 +1,36 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { picksApi } from '../../api';
 import { PickDetail } from '../../api/types';
 import { LoadingSpinner } from '../../components/common/LoadingSpinner';
+import { useAnalytics } from '../../services/analytics/provider';
 
 const AVAILABLE_YEARS = [2025, 2024, 2023];
 
 export default function PicksPage() {
+  const analytics = useAnalytics();
   const [picks, setPicks] = useState<PickDetail[]>([]);
   const [selectedYear, setSelectedYear] = useState(2025);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const handleYearChange = useCallback((year: number) => {
+    analytics.trackEvent('PICKS_FILTER_CHANGED', {
+      filter_type: 'year',
+      value: year,
+      previous_value: selectedYear,
+      total_years_available: AVAILABLE_YEARS.length
+    });
+    setSelectedYear(year);
+  }, [analytics, selectedYear]);
+
+  const handlePickClick = useCallback((pick: PickDetail) => {
+    analytics.trackEvent('PICKS_ROW_CLICKED', {
+      player_id: pick.player_id,
+      pick_person_id: pick.pick_person_id,
+      pick_status: pick.pick_person_death_date ? 'deceased' : 'alive',
+      year: selectedYear
+    });
+  }, [analytics, selectedYear]);
 
   useEffect(() => {
     const fetchPicks = async () => {
@@ -35,16 +56,42 @@ export default function PicksPage() {
 
         setPicks(sortedPicks);
         setError(null);
+
+        // Calculate pick statistics
+        const totalPicks = sortedPicks.length;
+        const deceasedPicks = sortedPicks.filter(pick => pick.pick_person_death_date).length;
+        const alivePicks = totalPicks - deceasedPicks;
+        const averageAge = sortedPicks.reduce((sum, pick) => sum + (pick.pick_person_age || 0), 0) / totalPicks;
+
+        // Track successful picks load with statistics
+        analytics.trackEvent('PICKS_LOAD_SUCCESS', {
+          year: selectedYear,
+          total_picks: totalPicks,
+          deceased_picks: deceasedPicks,
+          alive_picks: alivePicks,
+          average_age: Math.round(averageAge),
+          has_data: totalPicks > 0
+        });
       } catch (err) {
         console.error('Failed to fetch picks:', err);
-        setError('Failed to load picks. Please try again later.');
+        const errorMessage = 'Failed to load picks. Please try again later.';
+        setError(errorMessage);
+
+        // Track error with picks-specific event
+        analytics.trackEvent('PICKS_LOAD_ERROR', {
+          error_type: 'api_error',
+          error_message: errorMessage,
+          endpoint: 'getAll',
+          year: selectedYear,
+          component: 'PicksPage'
+        });
       } finally {
         setLoading(false);
       }
     };
 
     fetchPicks();
-  }, [selectedYear]);
+  }, [selectedYear, analytics]);
 
   const formatDate = (dateString: string | null) => {
     if (!dateString) return 'N/A';
@@ -66,7 +113,7 @@ export default function PicksPage() {
         <div className="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
           <select
             value={selectedYear}
-            onChange={(e) => setSelectedYear(Number(e.target.value))}
+            onChange={(e) => handleYearChange(Number(e.target.value))}
             className="block w-full rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6"
           >
             {AVAILABLE_YEARS.map((year) => (
@@ -121,7 +168,11 @@ export default function PicksPage() {
                       </tr>
                     ) : (
                       picks.map((pick) => (
-                        <tr key={`${pick.player_id}-${pick.pick_person_id}`}>
+                        <tr
+                          key={`${pick.player_id}-${pick.pick_person_id}`}
+                          onClick={() => handlePickClick(pick)}
+                          className="cursor-pointer hover:bg-gray-50"
+                        >
                           <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
                             {pick.player_name}
                           </td>

@@ -2,8 +2,10 @@ import { useEffect, useState } from 'react';
 import { playersApi } from '../../api';
 import { Player } from '../../api/types';
 import { LoadingSpinner } from '../../components/common/LoadingSpinner';
+import { useAnalytics } from '../../services/analytics/provider';
 
 export default function PlayersPage() {
+  const analytics = useAnalytics();
   const [players, setPlayers] = useState<Player[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -15,16 +17,33 @@ export default function PlayersPage() {
         const response = await playersApi.getAll();
         setPlayers(response.data);
         setError(null);
+
+        // Track successful players load
+        analytics.trackEvent('PLAYER_SEARCH', {
+          total_players: response.data.length,
+          has_data: response.data.length > 0,
+          years_represented: [...new Set(response.data.map(p => p.year))].sort(),
+          filter_type: 'all'
+        });
       } catch (err) {
         console.error('Failed to fetch players:', err);
-        setError('Failed to load players. Please try again later.');
+        const errorMessage = 'Failed to load players. Please try again later.';
+        setError(errorMessage);
+
+        // Track error
+        analytics.trackEvent('API_ERROR', {
+          error_type: 'api_error',
+          error_message: errorMessage,
+          endpoint: 'getAll',
+          component: 'PlayersPage'
+        });
       } finally {
         setLoading(false);
       }
     };
 
     fetchPlayers();
-  }, []);
+  }, [analytics]);
 
   return (
     <div>
@@ -65,6 +84,16 @@ export default function PlayersPage() {
                       <tr>
                         <td colSpan={3} className="text-center py-4 text-sm text-gray-500">
                           No players added yet.
+                          {/* Track empty state when rendered */}
+                          {(() => {
+                            analytics.trackEvent('PLAYER_SEARCH', {
+                              total_players: 0,
+                              has_data: false,
+                              state: 'empty',
+                              filter_type: 'all'
+                            });
+                            return null;
+                          })()}
                         </td>
                       </tr>
                     ) : (
