@@ -10,7 +10,8 @@ export default function PicksPage() {
   const analytics = useAnalytics();
   const [picks, setPicks] = useState<PickDetail[]>([]);
   const [selectedYear, setSelectedYear] = useState(2025);
-  const [loading, setLoading] = useState(true);
+  const [picksLoading, setPicksLoading] = useState(true);
+  const [pickCountsLoading, setPickCountsLoading] = useState(true);
   const [pickCounts, setPickCounts] = useState<PickCount[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [picksCountError, setPicksCountError] = useState<string | null>(null);
@@ -37,7 +38,7 @@ export default function PicksPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        setLoading(true);
+        setPicksLoading(true);
         const response = await picksApi.getAll(selectedYear);
         
         // Create a new array with parsed dates for sorting
@@ -88,7 +89,7 @@ export default function PicksPage() {
           component: 'PicksPage'
         });
       } finally {
-        setLoading(false);
+        setPicksLoading(false);
       }
     };
 
@@ -99,6 +100,7 @@ export default function PicksPage() {
   useEffect(() => {
     const fetchPickCounts = async () => {
       try {
+        setPickCountsLoading(true);
         const response = await picksApi.getPickCounts(selectedYear);
         setPickCounts(response.data);
         setPicksCountError(null);
@@ -119,6 +121,8 @@ export default function PicksPage() {
           year: selectedYear,
           component: 'PicksPage'
         });
+      } finally {
+        setPickCountsLoading(false);
       }
     };
 
@@ -157,10 +161,10 @@ export default function PicksPage() {
         </div>
       </div>
       
-      {loading ? (
-              <div className="flex justify-center items-center min-h-[200px]">
-                <LoadingSpinner size="lg" />
-              </div>
+      {picksLoading ? (
+        <div className="flex justify-center items-center min-h-[200px]">
+          <LoadingSpinner size="lg" />
+        </div>
       ) : error ? (
         <div className="mt-8 text-center text-red-600">{error}</div>
       ) : (
@@ -245,7 +249,11 @@ export default function PicksPage() {
       {/* Pick Counts Table */}
       <div className="mt-16">
         <h2 className="text-xl font-semibold text-gray-900 mb-4">Pick Counts by Player</h2>
-        {picksCountError ? (
+        {pickCountsLoading ? (
+          <div className="flex justify-center items-center min-h-[200px]">
+            <LoadingSpinner size="lg" />
+          </div>
+        ) : picksCountError ? (
           <div className="text-center text-red-600">{picksCountError}</div>
         ) : (
           <div className="flow-root">
