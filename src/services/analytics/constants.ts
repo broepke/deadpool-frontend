@@ -6,6 +6,7 @@ export type AnalyticsEventName =
   | 'DRAFT_PICK'
   | 'DRAFT_PICK_SUBMIT'
   | 'DRAFT_PICK_ERROR'
+  | 'DRAFT_COMPLETE'
   | 'LEADERBOARD_VIEW'
   | 'LEADERBOARD_FILTER'
   | 'LEADERBOARD_SORT'
@@ -39,6 +40,7 @@ export const ANALYTICS_EVENTS: Record<AnalyticsEventName, string> = {
   DRAFT_PICK: 'draft_pick',
   DRAFT_PICK_SUBMIT: 'draft_pick_submit',
   DRAFT_PICK_ERROR: 'draft_pick_error',
+  DRAFT_COMPLETE: 'draft_complete',
 
   // Leaderboard Events
   LEADERBOARD_VIEW: 'leaderboard_view',

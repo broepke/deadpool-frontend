@@ -65,13 +65,21 @@ export default function DraftPage() {
           });
         }
       }
-    } catch (err) {
-      setError('Failed to fetch next drafter');
-      analytics.trackEvent('ERROR_OCCURRED', {
-        error_type: 'api_error',
-        error_message: 'Failed to fetch next drafter',
-        endpoint: 'getNextDrafter'
-      });
+    } catch (err: any) {
+      // Handle the specific case of no eligible players
+      if (err.response?.data?.detail === "No eligible players found") {
+        setCurrentDrafter(null);
+        analytics.trackEvent('DRAFT_COMPLETE', {
+          event_type: 'no_eligible_players'
+        });
+      } else {
+        setError('Failed to fetch next drafter');
+        analytics.trackEvent('ERROR_OCCURRED', {
+          error_type: 'api_error',
+          error_message: 'Failed to fetch next drafter',
+          endpoint: 'getNextDrafter'
+        });
+      }
       console.error(err);
     }
   };
@@ -212,13 +220,19 @@ export default function DraftPage() {
         <div className="card">
           <h2 className="text-lg font-medium text-gray-900">Current Turn</h2>
           <div className="mt-4">
-            {currentDrafter && (
+            {currentDrafter ? (
               <div className="mt-2 p-4 rounded-md bg-blue-50 border border-blue-200">
                 <div className="flex items-center justify-between">
                   <span className="text-lg font-medium text-blue-900">{currentDrafter.name}</span>
                   <span className="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-sm font-medium text-blue-800">
                     Current Drafter
                   </span>
+                </div>
+              </div>
+            ) : (
+              <div className="mt-2 p-4 rounded-md bg-gray-50 border border-gray-200">
+                <div className="flex items-center justify-center">
+                  <span className="text-lg font-medium text-gray-900">No eligible players found</span>
                 </div>
               </div>
             )}
