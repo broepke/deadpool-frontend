@@ -1,22 +1,27 @@
 # ADR: Admin Draft Mode Implementation
 
 ## Context
+
 We need to implement an "Admin" mode that allows designated users to submit draft picks on behalf of other users. This is necessary for scenarios where the drafting user doesn't have access to a computer during their turn.
 
 ## Decision
+
 We will implement an Admin Draft Mode with the following key components:
 
 1. **Admin User Role**
+
    - Add an `isAdmin` boolean flag to the user model
    - Initially limit this to 2 designated admin users
    - Admin status will be managed through backend configuration
 
 2. **Draft-As-User Feature**
+
    - Add a user selection dropdown for admins in the draft interface
    - When an admin is drafting, they must explicitly select which user they are drafting for
    - The draft submission will be attributed to the selected user, not the admin
 
 3. **Security Measures**
+
    - Admin status must be verified on both frontend and backend
    - All draft-as-user actions will be logged for audit purposes
    - Backend validation will ensure:
@@ -34,6 +39,7 @@ We will implement an Admin Draft Mode with the following key components:
 ### Frontend Changes
 
 1. Extend Auth Context:
+
 ```typescript
 // src/features/auth/AuthContext.tsx
 interface ExtendedAuthState extends AuthState {
@@ -43,11 +49,12 @@ interface ExtendedAuthState extends AuthState {
 // Hook to access admin status
 const useIsAdmin = () => {
   const auth = useAuth();
-  return auth.user?.profile.groups?.includes('deadpool-admin') || false;
+  return auth.user?.profile.groups?.includes("deadpool-admin") || false;
 };
 ```
 
 2. Modify Draft Interface:
+
 ```typescript
 // src/api/types.ts
 export interface DraftRequest {
@@ -64,23 +71,24 @@ interface AdminDraftState {
 ```
 
 3. Add Admin Draft UI Components:
+
 ```typescript
 // src/features/draft/AdminDraftControls.tsx
 const AdminDraftControls = ({
   onUserSelect,
   selectedUserId,
-  availableUsers
+  availableUsers,
 }: AdminDraftControlsProps) => {
   return (
     <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-md">
       <h3 className="text-sm font-medium text-yellow-900">Admin Draft Mode</h3>
       <select
-        value={selectedUserId || ''}
+        value={selectedUserId || ""}
         onChange={(e) => onUserSelect(e.target.value)}
         className="mt-2 block w-full rounded-md border-gray-300"
       >
         <option value="">Select user to draft for...</option>
-        {availableUsers.map(user => (
+        {availableUsers.map((user) => (
           <option key={user.id} value={user.id}>
             {user.name}
           </option>
@@ -94,19 +102,21 @@ const AdminDraftControls = ({
 ### Backend Changes
 
 1. Extend User Model:
+
 ```sql
 ALTER TABLE players
 ADD COLUMN is_admin BOOLEAN DEFAULT FALSE;
 ```
 
 2. Add Admin Middleware:
+
 ```typescript
 // Backend middleware (pseudo-code)
 const verifyAdmin = async (req, res, next) => {
   const user = req.user;
-  if (!user.groups.includes('deadpool-admin')) {
+  if (!user.groups.includes("deadpool-admin")) {
     return res.status(403).json({
-      message: 'Admin access required'
+      message: "Admin access required",
     });
   }
   next();
@@ -114,30 +124,31 @@ const verifyAdmin = async (req, res, next) => {
 ```
 
 3. Modify Draft Endpoint:
+
 ```typescript
 // Backend API (pseudo-code)
-router.post('/draft', async (req, res) => {
+router.post("/draft", async (req, res) => {
   const { name, player_id, drafted_by_id } = req.body;
-  
+
   // If drafted_by_id is present, verify admin status
   if (drafted_by_id) {
     const admin = await getUser(drafted_by_id);
     if (!admin.is_admin) {
       return res.status(403).json({
-        message: 'Only admins can draft for other users'
+        message: "Only admins can draft for other users",
       });
     }
   }
 
   // Add to audit log
   await auditLog.create({
-    action: 'DRAFT',
+    action: "DRAFT",
     target_user_id: player_id,
     admin_user_id: drafted_by_id,
     details: {
       celebrity_name: name,
-      timestamp: new Date()
-    }
+      timestamp: new Date(),
+    },
   });
 
   // Proceed with draft
@@ -146,6 +157,7 @@ router.post('/draft', async (req, res) => {
 ```
 
 4. Add Audit Logging:
+
 ```sql
 CREATE TABLE audit_logs (
   id SERIAL PRIMARY KEY,
@@ -160,16 +172,19 @@ CREATE TABLE audit_logs (
 ## Consequences
 
 ### Positive
+
 - Enables flexible draft management when users are unavailable
 - Maintains draft flow even when users can't access computers
 - Provides clear accountability through audit logging
 
 ### Negative
+
 - Increases system complexity
 - Requires careful security implementation
 - Needs clear communication about admin capabilities
 
 ### Risks
+
 - Potential for admin user mistakes when drafting for others
 - Need for clear policies about when admin drafting is appropriate
 - Must ensure proper security to prevent abuse
@@ -177,6 +192,7 @@ CREATE TABLE audit_logs (
 ## Alternatives Considered
 
 1. **Delegation System**
+
    - Allow users to temporarily delegate their draft rights
    - Rejected due to additional complexity and time constraints
 
@@ -187,6 +203,7 @@ CREATE TABLE audit_logs (
 ## Implementation Plan
 
 1. Phase 1: Core Admin Infrastructure (Week 1)
+
    - Add admin flag to player table
    - Configure OpenID Connect groups for admin role
    - Implement admin verification middleware
@@ -194,6 +211,7 @@ CREATE TABLE audit_logs (
    - Add isAdmin check to auth context
 
 2. Phase 2: Draft-As-User Feature (Week 2)
+
    - Create AdminDraftControls component
    - Modify DraftPage to support admin drafting
    - Update draft API endpoint to handle admin submissions
@@ -210,6 +228,7 @@ CREATE TABLE audit_logs (
 ## Migration Strategy
 
 1. Database Updates:
+
 ```sql
 -- Create audit logs table
 CREATE TABLE audit_logs (
@@ -231,6 +250,7 @@ CREATE INDEX idx_audit_logs_target_user ON audit_logs(target_user_id);
 ```
 
 2. Initial Admin Setup:
+
 ```sql
 -- Set initial admin users (replace with actual user IDs)
 UPDATE players
@@ -239,14 +259,15 @@ WHERE id IN ('admin-user-1-id', 'admin-user-2-id');
 ```
 
 3. Feature Flag Implementation:
+
 ```typescript
 // src/config/features.ts
 export const FEATURES = {
-  ADMIN_DRAFT: process.env.ENABLE_ADMIN_DRAFT === 'true'
+  ADMIN_DRAFT: process.env.ENABLE_ADMIN_DRAFT === "true",
 };
 
 // Usage in components
-import { FEATURES } from '../config/features';
+import { FEATURES } from "../config/features";
 
 const AdminDraftControls = () => {
   if (!FEATURES.ADMIN_DRAFT) return null;
@@ -257,12 +278,14 @@ const AdminDraftControls = () => {
 ## Rollout Plan
 
 1. Pre-deployment
+
    - Update OpenID Connect configuration
    - Add admin users to appropriate groups
    - Deploy database migrations
    - Enable feature flag in staging
 
 2. Deployment Steps
+
    - Deploy backend changes with admin endpoints disabled
    - Deploy frontend changes behind feature flag
    - Enable admin endpoints with rate limiting
@@ -279,12 +302,14 @@ const AdminDraftControls = () => {
 ## Monitoring and Alerts
 
 1. Security Monitoring
+
    - Alert on multiple failed admin actions
    - Monitor rate limit violations
    - Track unusual drafting patterns
    - Log all admin session activities
 
 2. Performance Monitoring
+
    - Track admin action response times
    - Monitor database performance
    - Watch for increased error rates
