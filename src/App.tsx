@@ -6,23 +6,26 @@ import LeaderboardPage from './features/leaderboard/LeaderboardPage';
 import DraftPage from './features/draft/DraftPage';
 import ProfilePage from './features/profile/ProfilePage';
 import AuthGuard from './features/auth/AuthGuard';
+import { AnalyticsProvider } from './services/analytics/provider';
 
 function App() {
   return (
     <Router>
-      <Routes>
-        <Route element={<AuthGuard />}>
-          <Route path="/" element={<MainLayout />}>
-            <Route index element={<Navigate to="/draft" replace />} />
-            <Route path="players" element={<PlayersPage />} />
-            <Route path="picks" element={<PicksPage />} />
-            <Route path="leaderboard" element={<LeaderboardPage />} />
-            <Route path="draft" element={<DraftPage />} />
-            <Route path="profile" element={<ProfilePage />} />
-            <Route path="*" element={<Navigate to="/draft" replace />} />
+      <AnalyticsProvider>
+        <Routes>
+          <Route element={<AuthGuard />}>
+            <Route path="/" element={<MainLayout />}>
+              <Route index element={<Navigate to="/draft" replace />} />
+              <Route path="players" element={<PlayersPage />} />
+              <Route path="picks" element={<PicksPage />} />
+              <Route path="leaderboard" element={<LeaderboardPage />} />
+              <Route path="draft" element={<DraftPage />} />
+              <Route path="profile" element={<ProfilePage />} />
+              <Route path="*" element={<Navigate to="/draft" replace />} />
+            </Route>
           </Route>
-        </Route>
-      </Routes>
+        </Routes>
+      </AnalyticsProvider>
     </Router>
   );
 }

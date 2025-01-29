@@ -157,26 +157,26 @@ export interface PageViewProperties {
 // src/services/analytics/config.ts
 export const ANALYTICS_CONFIG = {
   token: import.meta.env.VITE_MIXPANEL_TOKEN,
-  enabled: import.meta.env.VITE_ANALYTICS_ENABLED === 'true',
-  debug: import.meta.env.VITE_ANALYTICS_DEBUG === 'true',
+  enabled: import.meta.env.VITE_ANALYTICS_ENABLED === "true",
+  debug: import.meta.env.VITE_ANALYTICS_DEBUG === "true",
   defaultProperties: {
     environment: import.meta.env.VITE_ENV,
     app_version: import.meta.env.VITE_APP_VERSION,
-  }
+  },
 };
 
 // src/services/analytics/constants.ts
 export const ANALYTICS_EVENTS = {
-  PAGE_VIEW: 'page_view',
-  USER_LOGIN: 'user_login',
-  USER_LOGOUT: 'user_logout',
-  DRAFT_PICK: 'draft_pick',
-  LEADERBOARD_VIEW: 'leaderboard_view',
-  PROFILE_UPDATE: 'profile_update',
-  PLAYER_SELECT: 'player_select',
-  ERROR_OCCURRED: 'error_occurred',
-  FORM_SUBMIT: 'form_submit',
-  FORM_ERROR: 'form_error'
+  PAGE_VIEW: "page_view",
+  USER_LOGIN: "user_login",
+  USER_LOGOUT: "user_logout",
+  DRAFT_PICK: "draft_pick",
+  LEADERBOARD_VIEW: "leaderboard_view",
+  PROFILE_UPDATE: "profile_update",
+  PLAYER_SELECT: "player_select",
+  ERROR_OCCURRED: "error_occurred",
+  FORM_SUBMIT: "form_submit",
+  FORM_ERROR: "form_error",
 } as const;
 
 // src/services/analytics/index.ts
@@ -194,46 +194,49 @@ export class MixpanelAnalytics implements AnalyticsService {
 
   private initialize() {
     if (this.initialized) return;
-    
+
     this.mixpanel = mixpanel.init(this.config.token, {
       debug: this.config.debug,
-      persistence: 'localStorage'
+      persistence: "localStorage",
     });
-    
+
     this.initialized = true;
   }
 
   identify(userId: string, userProperties?: Partial<AnalyticsUser>) {
     if (!this.initialized) return;
-    
+
     this.mixpanel.identify(userId);
     if (userProperties) {
       this.mixpanel.people.set({
         $email: userProperties.email,
         $name: userProperties.name,
         role: userProperties.role,
-        lastUpdated: new Date().toISOString()
+        lastUpdated: new Date().toISOString(),
       });
     }
   }
 
   trackPageView(properties: PageViewProperties) {
     if (!this.initialized) return;
-    
+
     this.mixpanel.track(ANALYTICS_EVENTS.PAGE_VIEW, {
       ...this.config.defaultProperties,
       ...properties,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
   }
 
-  trackEvent(name: keyof typeof ANALYTICS_EVENTS, properties?: Record<string, any>) {
+  trackEvent(
+    name: keyof typeof ANALYTICS_EVENTS,
+    properties?: Record<string, any>
+  ) {
     if (!this.initialized) return;
-    
+
     this.mixpanel.track(ANALYTICS_EVENTS[name], {
       ...this.config.defaultProperties,
       ...properties,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
   }
 }
@@ -241,7 +244,9 @@ export class MixpanelAnalytics implements AnalyticsService {
 // React Context Provider
 export const AnalyticsContext = createContext<AnalyticsService | null>(null);
 
-export const AnalyticsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const AnalyticsProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   const analytics = useMemo(() => new MixpanelAnalytics(ANALYTICS_CONFIG), []);
   const auth = useAuth(); // Using react-oidc-context
 
@@ -266,57 +271,61 @@ export const AnalyticsProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 ### Feature-Specific Implementation
 
 #### Draft Feature
+
 ```typescript
 // src/features/draft/DraftPage.tsx
 const DraftPage = () => {
   const trackEvent = useTrackEvent();
-  
+
   // Track draft pick submission
   const handlePickSubmit = (pick: Pick) => {
     trackEvent(ANALYTICS_EVENTS.DRAFT_PICK, {
       player_id: pick.playerId,
       round: pick.round,
       position: pick.position,
-      draft_status: pick.status
+      draft_status: pick.status,
     });
   };
 };
 ```
 
 #### Leaderboard Feature
+
 ```typescript
 // src/features/leaderboard/LeaderboardPage.tsx
 const LeaderboardPage = () => {
   const trackEvent = useTrackEvent();
-  
+
   // Track leaderboard filters
   const handleFilterChange = (filters: LeaderboardFilters) => {
     trackEvent(ANALYTICS_EVENTS.LEADERBOARD_VIEW, {
       filters_applied: filters,
       sort_by: filters.sortField,
-      sort_direction: filters.sortDirection
+      sort_direction: filters.sortDirection,
     });
   };
 };
 ```
 
 #### Profile Feature
+
 ```typescript
 // src/features/profile/ProfilePage.tsx
 const ProfilePage = () => {
   const trackEvent = useTrackEvent();
-  
+
   // Track profile updates
   const handleProfileUpdate = (profile: UserProfile) => {
     trackEvent(ANALYTICS_EVENTS.PROFILE_UPDATE, {
       updated_fields: Object.keys(profile),
-      has_avatar: !!profile.avatarUrl
+      has_avatar: !!profile.avatarUrl,
     });
   };
 };
 ```
 
 #### Error Tracking
+
 ```typescript
 // src/api/client.ts
 const apiClient = axios.create({
@@ -324,17 +333,17 @@ const apiClient = axios.create({
 });
 
 apiClient.interceptors.response.use(
-  response => response,
-  error => {
+  (response) => response,
+  (error) => {
     const analytics = getAnalytics(); // Implement singleton access
-    
+
     analytics?.trackEvent(ANALYTICS_EVENTS.ERROR_OCCURRED, {
-      error_type: 'api_error',
+      error_type: "api_error",
       error_message: error.message,
       error_code: error.response?.status,
-      endpoint: error.config.url
+      endpoint: error.config.url,
     });
-    
+
     return Promise.reject(error);
   }
 );
@@ -343,54 +352,56 @@ apiClient.interceptors.response.use(
 ### Testing Considerations
 
 1. Analytics Service Testing:
+
 ```typescript
 // src/services/analytics/__tests__/analytics.test.ts
-describe('MixpanelAnalytics', () => {
-  it('should initialize with correct config', () => {
+describe("MixpanelAnalytics", () => {
+  it("should initialize with correct config", () => {
     const analytics = new MixpanelAnalytics({
-      token: 'test-token',
+      token: "test-token",
       enabled: true,
       debug: true,
       defaultProperties: {
-        environment: 'test'
-      }
+        environment: "test",
+      },
     });
-    
+
     expect(analytics.isInitialized()).toBe(true);
   });
 
-  it('should not track events when disabled', () => {
+  it("should not track events when disabled", () => {
     const analytics = new MixpanelAnalytics({
       enabled: false,
       // ... other config
     });
-    
-    const trackSpy = jest.spyOn(analytics, 'trackEvent');
+
+    const trackSpy = jest.spyOn(analytics, "trackEvent");
     analytics.trackEvent(ANALYTICS_EVENTS.PAGE_VIEW, {});
-    
+
     expect(trackSpy).not.toHaveBeenCalled();
   });
 });
 ```
 
 2. Integration Testing:
+
 ```typescript
 // src/features/draft/__tests__/DraftPage.test.tsx
-it('should track draft pick submission', async () => {
+it("should track draft pick submission", async () => {
   const trackEvent = jest.fn();
   const { getByTestId } = render(
     <AnalyticsContext.Provider value={{ trackEvent }}>
       <DraftPage />
     </AnalyticsContext.Provider>
   );
-  
+
   // Simulate draft pick
-  await userEvent.click(getByTestId('submit-pick'));
-  
+  await userEvent.click(getByTestId("submit-pick"));
+
   expect(trackEvent).toHaveBeenCalledWith(
     ANALYTICS_EVENTS.DRAFT_PICK,
     expect.objectContaining({
-      player_id: expect.any(String)
+      player_id: expect.any(String),
     })
   );
 });

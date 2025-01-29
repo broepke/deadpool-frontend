@@ -5,9 +5,12 @@ import { picksApi } from '../../api/services/picks';
 import { PickDetail } from '../../api/types';
 import { LoadingSpinner } from '../../components/common/LoadingSpinner';
 import { isValidCelebrityName, sanitizeCelebrityName } from '../../utils/validation';
+import { useAnalytics } from '../../services/analytics/provider';
+import { ANALYTICS_EVENTS } from '../../services/analytics/constants';
 
 export default function DraftPage() {
   const auth = useAuth();
+  const analytics = useAnalytics();
   const [picks, setPicks] = useState<PickDetail[]>([]);
   const [currentPick, setCurrentPick] = useState('');
   const [currentDrafter, setCurrentDrafter] = useState<{ id: string; name: string } | null>(null);
@@ -29,8 +32,18 @@ export default function DraftPage() {
         })
         .slice(0, 10);
       setPicks(sortedPicks);
+
+      analytics.trackEvent(ANALYTICS_EVENTS.LEADERBOARD_VIEW, {
+        year: currentYear,
+        picks_count: sortedPicks.length
+      });
     } catch (err) {
       setError('Failed to load draft history');
+      analytics.trackEvent(ANALYTICS_EVENTS.ERROR_OCCURRED, {
+        error_type: 'api_error',
+        error_message: 'Failed to load draft history',
+        endpoint: 'getAll'
+      });
       console.error(err);
     }
   };
@@ -39,13 +52,27 @@ export default function DraftPage() {
     try {
       const response = await draftApi.getNextDrafter();
       if (response.data) {
-        setCurrentDrafter({
+        const nextDrafter = {
           id: response.data.player_id,
           name: response.data.player_name
-        });
+        };
+        setCurrentDrafter(nextDrafter);
+
+        // Track when it's the current user's turn
+        if (auth.user?.profile.sub === nextDrafter.id) {
+          analytics.trackEvent(ANALYTICS_EVENTS.DRAFT_PICK, {
+            event_type: 'turn_start',
+            player_name: nextDrafter.name
+          });
+        }
       }
     } catch (err) {
       setError('Failed to fetch next drafter');
+      analytics.trackEvent(ANALYTICS_EVENTS.ERROR_OCCURRED, {
+        error_type: 'api_error',
+        error_message: 'Failed to fetch next drafter',
+        endpoint: 'getNextDrafter'
+      });
       console.error(err);
     }
   };
@@ -74,7 +101,16 @@ export default function DraftPage() {
     
     // Validate input as user types
     if (value.trim() && !isValidCelebrityName(value)) {
-      setValidationError('Please use only letters, numbers, spaces, and basic punctuation (hyphens, apostrophes, periods, commas, parentheses)');
+      const errorMessage = 'Please use only letters, numbers, spaces, and basic punctuation (hyphens, apostrophes, periods, commas, parentheses)';
+      setValidationError(errorMessage);
+      
+      // Track validation error
+      analytics.trackEvent(ANALYTICS_EVENTS.FORM_ERROR, {
+        form: 'draft_pick',
+        field: 'celebrity_name',
+        error: errorMessage,
+        input_value: value
+      });
     }
   };
 
@@ -84,7 +120,16 @@ export default function DraftPage() {
     // Sanitize and validate the input
     const sanitizedName = sanitizeCelebrityName(currentPick);
     if (!isValidCelebrityName(sanitizedName)) {
-      setValidationError('Celebrity name contains invalid characters. Please use only letters, numbers, spaces, and basic punctuation (hyphens, apostrophes, periods, commas, parentheses).');
+      const errorMessage = 'Celebrity name contains invalid characters. Please use only letters, numbers, spaces, and basic punctuation (hyphens, apostrophes, periods, commas, parentheses).';
+      setValidationError(errorMessage);
+      
+      // Track validation error
+      analytics.trackEvent(ANALYTICS_EVENTS.FORM_ERROR, {
+        form: 'draft_pick',
+        field: 'celebrity_name',
+        error: errorMessage,
+        input_value: currentPick
+      });
       return;
     }
     
@@ -93,6 +138,13 @@ export default function DraftPage() {
       await draftApi.draftPerson({
         name: sanitizedName,
         player_id: currentDrafter.id
+      });
+      
+      // Track successful pick
+      analytics.trackEvent(ANALYTICS_EVENTS.DRAFT_PICK_SUBMIT, {
+        player_id: currentDrafter.id,
+        player_name: currentDrafter.name,
+        celebrity_name: sanitizedName
       });
       
       setCurrentPick('');
@@ -106,6 +158,15 @@ export default function DraftPage() {
       // Extract the detailed error message if available
       const errorMessage = err.response?.data?.detail || 'Failed to submit pick';
       setError(errorMessage);
+      
+      // Track submission error
+      analytics.trackEvent(ANALYTICS_EVENTS.ERROR_OCCURRED, {
+        error_type: 'api_error',
+        error_message: errorMessage,
+        endpoint: 'draftPerson',
+        celebrity_name: sanitizedName
+      });
+      
       console.error(err);
     } finally {
       setIsSubmitting(false);
