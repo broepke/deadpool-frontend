@@ -53,17 +53,18 @@ export const AnalyticsProvider: React.FC<{ children: React.ReactNode }> = ({
   const navigationType = useNavigationType();
   const previousPath = useRef<string | undefined>();
 
-  // Handle user identification
+  // Initialize analytics only after authentication
   useEffect(() => {
-    if (auth.user) {
+    if (auth.isAuthenticated && auth.user) {
       const profile = auth.user.profile as UserProfile;
-      analytics.identify(profile.sub, {
+      // Initialize and identify in one step to prevent device ID generation
+      analytics.initializeAndIdentify(profile.sub, {
         email: profile.email,
         name: profile.name,
         role: profile.role || 'user'
       });
     }
-  }, [auth.user]);
+  }, [auth.isAuthenticated, auth.user]);
 
   // Automatic page view tracking
   useEffect(() => {

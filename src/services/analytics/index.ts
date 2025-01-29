@@ -16,8 +16,42 @@ export class MixpanelAnalytics implements AnalyticsService {
 
   constructor() {
     if (ANALYTICS_CONFIG.enabled) {
-      this.initialize();
       this.loadOfflineQueue();
+    }
+  }
+
+  initializeAndIdentify(userId: string, userProperties?: Partial<AnalyticsUser>): void {
+    if (!ANALYTICS_CONFIG.enabled) return;
+
+    try {
+      // Initialize Mixpanel with the user's ID immediately
+      mixpanel.init(ANALYTICS_CONFIG.token, {
+        debug: ANALYTICS_CONFIG.debug,
+        persistence: 'localStorage',
+        ignore_dnt: false,
+        loaded: () => {
+          // Set user ID immediately after initialization
+          mixpanel.identify(userId);
+          
+          if (userProperties) {
+            mixpanel.people.set({
+              $email: userProperties.email,
+              $name: userProperties.name,
+              role: userProperties.role,
+              lastUpdated: new Date().toISOString()
+            });
+          }
+        }
+      });
+      
+      this.initialized = true;
+      
+      if (ANALYTICS_CONFIG.debug) {
+        console.log('Mixpanel analytics initialized with user:', { userId, properties: userProperties });
+      }
+    } catch (error) {
+      console.error('Failed to initialize Mixpanel with user:', error);
+      this.initialized = false;
     }
   }
 
@@ -68,48 +102,9 @@ export class MixpanelAnalytics implements AnalyticsService {
     }
   }
 
-  private initialize(): void {
-    if (this.initialized) return;
-
-    try {
-      mixpanel.init(ANALYTICS_CONFIG.token, {
-        debug: ANALYTICS_CONFIG.debug,
-        persistence: 'localStorage',
-        ignore_dnt: false // Respect Do Not Track settings
-      });
-      
-      this.initialized = true;
-      
-      if (ANALYTICS_CONFIG.debug) {
-        console.log('Mixpanel analytics initialized');
-      }
-    } catch (error) {
-      console.error('Failed to initialize Mixpanel:', error);
-      this.initialized = false;
-    }
-  }
-
-  identify(userId: string, userProperties?: Partial<AnalyticsUser>): void {
-    if (!this.initialized) return;
-
-    try {
-      mixpanel.identify(userId);
-      
-      if (userProperties) {
-        mixpanel.people.set({
-          $email: userProperties.email,
-          $name: userProperties.name,
-          role: userProperties.role,
-          lastUpdated: new Date().toISOString()
-        });
-      }
-
-      if (ANALYTICS_CONFIG.debug) {
-        console.log('User identified:', { userId, properties: userProperties });
-      }
-    } catch (error) {
-      console.error('Failed to identify user:', error);
-    }
+  // Prevent separate initialization and identification
+  identify(_userId: string, _userProperties?: Partial<AnalyticsUser>): void {
+    console.warn('Direct identify calls are disabled. Use initializeAndIdentify instead.');
   }
 
   trackPageView(properties: PageViewProperties): void {
