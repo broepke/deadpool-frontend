@@ -6,10 +6,10 @@ import { useAuth } from 'react-oidc-context';
 import { useAnalytics } from '../services/analytics/provider';
 
 const navigation = [
-  { name: 'Players', href: '/players' },
-  { name: 'Picks', href: '/picks' },
-  { name: 'Leaderboard', href: '/leaderboard' },
   { name: 'Draft', href: '/draft' },
+  { name: 'Leaderboard', href: '/leaderboard' },
+  { name: 'Picks', href: '/picks' },
+  { name: 'Players', href: '/players' },
 ];
 
 export default function MainLayout() {
