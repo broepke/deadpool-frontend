@@ -73,6 +73,13 @@ export interface DraftRequest {
   player_id: string;
 }
 
+// Pick Count Types
+export interface PickCount {
+  player_id: string;
+  player_name: string;
+  pick_count: number;
+}
+
 // Leaderboard Types
 export interface LeaderboardEntry {
   player_id: string;

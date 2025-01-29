@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import { picksApi } from '../../api';
-import { PickDetail } from '../../api/types';
+import { PickDetail, PickCount } from '../../api/types';
 import { LoadingSpinner } from '../../components/common/LoadingSpinner';
 import { useAnalytics } from '../../services/analytics/provider';
 
@@ -11,7 +11,9 @@ export default function PicksPage() {
   const [picks, setPicks] = useState<PickDetail[]>([]);
   const [selectedYear, setSelectedYear] = useState(2025);
   const [loading, setLoading] = useState(true);
+  const [pickCounts, setPickCounts] = useState<PickCount[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [picksCountError, setPicksCountError] = useState<string | null>(null);
 
   const handleYearChange = useCallback((year: number) => {
     analytics.trackEvent('PICKS_FILTER_CHANGED', {
@@ -33,7 +35,7 @@ export default function PicksPage() {
   }, [analytics, selectedYear]);
 
   useEffect(() => {
-    const fetchPicks = async () => {
+    const fetchData = async () => {
       try {
         setLoading(true);
         const response = await picksApi.getAll(selectedYear);
@@ -90,7 +92,37 @@ export default function PicksPage() {
       }
     };
 
-    fetchPicks();
+    fetchData();
+  }, [selectedYear, analytics]);
+
+  // Separate effect for fetching pick counts
+  useEffect(() => {
+    const fetchPickCounts = async () => {
+      try {
+        const response = await picksApi.getPickCounts(selectedYear);
+        setPickCounts(response.data);
+        setPicksCountError(null);
+
+        analytics.trackEvent('PICK_COUNTS_LOAD_SUCCESS', {
+          year: selectedYear,
+          total_players: response.data.length
+        });
+      } catch (err) {
+        console.error('Failed to fetch pick counts:', err);
+        const errorMessage = 'Failed to load pick counts. Please try again later.';
+        setPicksCountError(errorMessage);
+
+        analytics.trackEvent('PICK_COUNTS_LOAD_ERROR', {
+          error_type: 'api_error',
+          error_message: errorMessage,
+          endpoint: 'getPickCounts',
+          year: selectedYear,
+          component: 'PicksPage'
+        });
+      }
+    };
+
+    fetchPickCounts();
   }, [selectedYear, analytics]);
 
   const formatDate = (dateString: string | null) => {
@@ -209,6 +241,55 @@ export default function PicksPage() {
           </div>
         </div>
       )}
+
+      {/* Pick Counts Table */}
+      <div className="mt-16">
+        <h2 className="text-xl font-semibold text-gray-900 mb-4">Pick Counts by Player</h2>
+        {picksCountError ? (
+          <div className="text-center text-red-600">{picksCountError}</div>
+        ) : (
+          <div className="flow-root">
+            <div className="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
+              <div className="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
+                <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 sm:rounded-lg">
+                  <table className="min-w-full divide-y divide-gray-300">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th scope="col" className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">
+                          Player
+                        </th>
+                        <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                          Number of Picks
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-200 bg-white">
+                      {pickCounts.length === 0 ? (
+                        <tr>
+                          <td colSpan={2} className="text-center py-4 text-sm text-gray-500">
+                            No pick counts available for {selectedYear}.
+                          </td>
+                        </tr>
+                      ) : (
+                        pickCounts.map((count) => (
+                          <tr key={count.player_id}>
+                            <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
+                              {count.player_name}
+                            </td>
+                            <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                              {count.pick_count}
+                            </td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

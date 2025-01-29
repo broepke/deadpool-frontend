@@ -18,6 +18,8 @@ export type AnalyticsEventName =
   | 'PICKS_ROW_CLICKED'
   | 'PICKS_LOAD_SUCCESS'
   | 'PICKS_LOAD_ERROR'
+  | 'PICK_COUNTS_LOAD_SUCCESS'
+  | 'PICK_COUNTS_LOAD_ERROR'
   | 'FORM_SUBMIT'
   | 'FORM_ERROR'
   | 'ERROR_OCCURRED'
@@ -57,6 +59,8 @@ export const ANALYTICS_EVENTS: Record<AnalyticsEventName, string> = {
   PICKS_ROW_CLICKED: 'picks_row_clicked',
   PICKS_LOAD_SUCCESS: 'picks_load_success',
   PICKS_LOAD_ERROR: 'picks_load_error',
+  PICK_COUNTS_LOAD_SUCCESS: 'pick_counts_load_success',
+  PICK_COUNTS_LOAD_ERROR: 'pick_counts_load_error',
 
   // Form Events
   FORM_SUBMIT: 'form_submit',
