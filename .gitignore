@@ -25,8 +25,8 @@ dist-ssr
 *.sw?
 
 # Environment files
-# .env
-# .env.*
+.env
+.env.*
 !.env.example
 
 # Testing
@@ -51,7 +51,7 @@ build
 aws.config.js
 
 # Local development overrides
-# .env.local
-# .env.development.local
-# .env.test.local
-# .env.production.local
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local

@@ -3,7 +3,6 @@ import { picksApi } from '../../api';
 import { PickDetail } from '../../api/types';
 import { LoadingSpinner } from '../../components/common/LoadingSpinner';
 import { useAnalytics } from '../../services/analytics/provider';
-import { ANALYTICS_EVENTS } from '../../services/analytics/constants';
 
 const AVAILABLE_YEARS = [2025, 2024, 2023];
 
@@ -15,7 +14,7 @@ export default function PicksPage() {
   const [error, setError] = useState<string | null>(null);
 
   const handleYearChange = useCallback((year: number) => {
-    analytics.trackEvent(ANALYTICS_EVENTS.PICKS_FILTER_CHANGED, {
+    analytics.trackEvent('PICKS_FILTER_CHANGED', {
       filter_type: 'year',
       value: year,
       previous_value: selectedYear,
@@ -25,7 +24,7 @@ export default function PicksPage() {
   }, [analytics, selectedYear]);
 
   const handlePickClick = useCallback((pick: PickDetail) => {
-    analytics.trackEvent(ANALYTICS_EVENTS.PICKS_ROW_CLICKED, {
+    analytics.trackEvent('PICKS_ROW_CLICKED', {
       player_id: pick.player_id,
       pick_person_id: pick.pick_person_id,
       pick_status: pick.pick_person_death_date ? 'deceased' : 'alive',
@@ -65,7 +64,7 @@ export default function PicksPage() {
         const averageAge = sortedPicks.reduce((sum, pick) => sum + (pick.pick_person_age || 0), 0) / totalPicks;
 
         // Track successful picks load with statistics
-        analytics.trackEvent(ANALYTICS_EVENTS.PICKS_LOAD_SUCCESS, {
+        analytics.trackEvent('PICKS_LOAD_SUCCESS', {
           year: selectedYear,
           total_picks: totalPicks,
           deceased_picks: deceasedPicks,
@@ -79,7 +78,7 @@ export default function PicksPage() {
         setError(errorMessage);
 
         // Track error with picks-specific event
-        analytics.trackEvent(ANALYTICS_EVENTS.PICKS_LOAD_ERROR, {
+        analytics.trackEvent('PICKS_LOAD_ERROR', {
           error_type: 'api_error',
           error_message: errorMessage,
           endpoint: 'getAll',

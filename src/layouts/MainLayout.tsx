@@ -4,7 +4,6 @@ import { Disclosure, Menu, Transition } from '@headlessui/react';
 import { Bars3Icon, XMarkIcon, UserCircleIcon } from '@heroicons/react/24/outline';
 import { useAuth } from 'react-oidc-context';
 import { useAnalytics } from '../services/analytics/provider';
-import { ANALYTICS_EVENTS } from '../services/analytics/constants';
 
 const navigation = [
   { name: 'Players', href: '/players' },
@@ -28,7 +27,7 @@ export default function MainLayout() {
 
   const handleSignOut = async () => {
     // Track sign out event before clearing user data
-    analytics.trackEvent(ANALYTICS_EVENTS.USER_LOGOUT, {
+    analytics.trackEvent('USER_LOGOUT', {
       email: auth.user?.profile.email
     });
 

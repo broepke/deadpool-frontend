@@ -3,7 +3,6 @@ import { playersApi } from '../../api';
 import { Player } from '../../api/types';
 import { LoadingSpinner } from '../../components/common/LoadingSpinner';
 import { useAnalytics } from '../../services/analytics/provider';
-import { ANALYTICS_EVENTS } from '../../services/analytics/constants';
 
 export default function PlayersPage() {
   const analytics = useAnalytics();
@@ -20,11 +19,11 @@ export default function PlayersPage() {
         setError(null);
 
         // Track successful players load
-        analytics.trackEvent(ANALYTICS_EVENTS.PAGE_VIEW, {
-          page: 'players',
+        analytics.trackEvent('PLAYER_SEARCH', {
           total_players: response.data.length,
           has_data: response.data.length > 0,
-          years_represented: [...new Set(response.data.map(p => p.year))].sort()
+          years_represented: [...new Set(response.data.map(p => p.year))].sort(),
+          filter_type: 'all'
         });
       } catch (err) {
         console.error('Failed to fetch players:', err);
@@ -32,7 +31,7 @@ export default function PlayersPage() {
         setError(errorMessage);
 
         // Track error
-        analytics.trackEvent(ANALYTICS_EVENTS.ERROR_OCCURRED, {
+        analytics.trackEvent('API_ERROR', {
           error_type: 'api_error',
           error_message: errorMessage,
           endpoint: 'getAll',
@@ -87,11 +86,11 @@ export default function PlayersPage() {
                           No players added yet.
                           {/* Track empty state when rendered */}
                           {(() => {
-                            analytics.trackEvent(ANALYTICS_EVENTS.PAGE_VIEW, {
-                              page: 'players',
+                            analytics.trackEvent('PLAYER_SEARCH', {
                               total_players: 0,
                               has_data: false,
-                              state: 'empty'
+                              state: 'empty',
+                              filter_type: 'all'
                             });
                             return null;
                           })()}

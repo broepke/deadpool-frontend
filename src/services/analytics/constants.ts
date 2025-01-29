@@ -1,4 +1,31 @@
-export const ANALYTICS_EVENTS = {
+// Define the union type of all possible event names
+export type AnalyticsEventName =
+  | 'PAGE_VIEW'
+  | 'USER_LOGIN'
+  | 'USER_LOGOUT'
+  | 'DRAFT_PICK'
+  | 'DRAFT_PICK_SUBMIT'
+  | 'DRAFT_PICK_ERROR'
+  | 'LEADERBOARD_VIEW'
+  | 'LEADERBOARD_FILTER'
+  | 'LEADERBOARD_SORT'
+  | 'PROFILE_UPDATE'
+  | 'PROFILE_VIEW'
+  | 'PLAYER_SELECT'
+  | 'PLAYER_SEARCH'
+  | 'PLAYER_FILTER'
+  | 'PICKS_FILTER_CHANGED'
+  | 'PICKS_ROW_CLICKED'
+  | 'PICKS_LOAD_SUCCESS'
+  | 'PICKS_LOAD_ERROR'
+  | 'FORM_SUBMIT'
+  | 'FORM_ERROR'
+  | 'ERROR_OCCURRED'
+  | 'API_ERROR'
+  | 'CLIENT_ERROR'
+  | 'AUTH_ERROR';
+
+export const ANALYTICS_EVENTS: Record<AnalyticsEventName, string> = {
   // Page Views
   PAGE_VIEW: 'page_view',
 
@@ -40,10 +67,7 @@ export const ANALYTICS_EVENTS = {
   API_ERROR: 'api_error',
   CLIENT_ERROR: 'client_error',
   AUTH_ERROR: 'auth_error'
-} as const;
-
-// Type for event names
-export type AnalyticsEventName = keyof typeof ANALYTICS_EVENTS;
+};
 
 // Common property types
 export interface CommonEventProperties {

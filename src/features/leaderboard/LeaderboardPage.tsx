@@ -3,7 +3,6 @@ import { leaderboardApi } from '../../api';
 import { LeaderboardEntry } from '../../api/types';
 import { LoadingSpinner } from '../../components/common/LoadingSpinner';
 import { useAnalytics } from '../../services/analytics/provider';
-import { ANALYTICS_EVENTS } from '../../services/analytics/constants';
 
 const AVAILABLE_YEARS = [2025, 2024, 2023];
 
@@ -15,7 +14,7 @@ export default function LeaderboardPage() {
   const [error, setError] = useState<string | null>(null);
 
   const handleYearChange = useCallback((year: number) => {
-    analytics.trackEvent(ANALYTICS_EVENTS.LEADERBOARD_FILTER, {
+    analytics.trackEvent('LEADERBOARD_FILTER', {
       filter_type: 'year',
       value: year,
       previous_value: selectedYear
@@ -32,7 +31,7 @@ export default function LeaderboardPage() {
         setError(null);
 
         // Track successful leaderboard load
-        analytics.trackEvent(ANALYTICS_EVENTS.LEADERBOARD_VIEW, {
+        analytics.trackEvent('LEADERBOARD_VIEW', {
           year: selectedYear,
           total_players: response.data.length,
           has_data: response.data.length > 0,
@@ -44,7 +43,7 @@ export default function LeaderboardPage() {
         setError(errorMessage);
 
         // Track error
-        analytics.trackEvent(ANALYTICS_EVENTS.ERROR_OCCURRED, {
+        analytics.trackEvent('ERROR_OCCURRED', {
           error_type: 'api_error',
           error_message: errorMessage,
           endpoint: 'getLeaderboard',
@@ -115,7 +114,7 @@ export default function LeaderboardPage() {
                           No players on the leaderboard yet.
                           {/* Track empty state when rendered */}
                           {(() => {
-                            analytics.trackEvent(ANALYTICS_EVENTS.LEADERBOARD_VIEW, {
+                            analytics.trackEvent('LEADERBOARD_VIEW', {
                               year: selectedYear,
                               total_players: 0,
                               has_data: false,

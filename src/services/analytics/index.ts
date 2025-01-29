@@ -1,14 +1,70 @@
 import mixpanel from 'mixpanel-browser';
 import { AnalyticsService, AnalyticsUser, PageViewProperties } from './types';
 import { ANALYTICS_CONFIG } from './config';
-import { ANALYTICS_EVENTS, AnalyticsEventName, CommonEventProperties } from './constants';
+import { ANALYTICS_EVENTS, AnalyticsEventName } from './constants';
+
+interface QueuedEvent {
+  name: AnalyticsEventName;
+  properties?: Record<string, any>;
+  timestamp: string;
+}
 
 export class MixpanelAnalytics implements AnalyticsService {
   private initialized: boolean = false;
+  private offlineQueue: QueuedEvent[] = [];
+  private readonly QUEUE_KEY = 'mixpanel_offline_queue';
 
   constructor() {
     if (ANALYTICS_CONFIG.enabled) {
       this.initialize();
+      this.loadOfflineQueue();
+    }
+  }
+
+  private loadOfflineQueue(): void {
+    try {
+      const savedQueue = localStorage.getItem(this.QUEUE_KEY);
+      if (savedQueue) {
+        this.offlineQueue = JSON.parse(savedQueue);
+      }
+    } catch (error) {
+      console.error('Failed to load offline queue:', error);
+      this.offlineQueue = [];
+    }
+  }
+
+  private saveOfflineQueue(): void {
+    try {
+      localStorage.setItem(this.QUEUE_KEY, JSON.stringify(this.offlineQueue));
+    } catch (error) {
+      console.error('Failed to save offline queue:', error);
+    }
+  }
+
+  private queueEvent(name: AnalyticsEventName, properties?: Record<string, any>): void {
+    this.offlineQueue.push({
+      name,
+      properties,
+      timestamp: new Date().toISOString()
+    });
+    this.saveOfflineQueue();
+  }
+
+  async processOfflineEvents(): Promise<void> {
+    if (!this.initialized || !navigator.onLine) return;
+
+    const events = [...this.offlineQueue];
+    this.offlineQueue = [];
+    this.saveOfflineQueue();
+
+    for (const event of events) {
+      try {
+        await this.trackEvent(event.name, event.properties);
+      } catch (error) {
+        // If tracking fails, add back to queue
+        this.queueEvent(event.name, event.properties);
+        throw error;
+      }
     }
   }
 
@@ -76,23 +132,43 @@ export class MixpanelAnalytics implements AnalyticsService {
     }
   }
 
-  trackEvent(name: AnalyticsEventName, properties?: Record<string, any>): void {
+  async trackEvent(name: AnalyticsEventName, properties?: Record<string, any>): Promise<void> {
     if (!this.initialized) return;
 
-    try {
-      const eventProperties = {
-        ...ANALYTICS_CONFIG.defaultProperties,
-        ...properties,
-        timestamp: new Date().toISOString()
-      };
+    const eventProperties = {
+      ...ANALYTICS_CONFIG.defaultProperties,
+      ...properties,
+      timestamp: new Date().toISOString()
+    };
 
-      mixpanel.track(ANALYTICS_EVENTS[name], eventProperties);
+    if (!navigator.onLine) {
+      this.queueEvent(name, eventProperties);
+      if (ANALYTICS_CONFIG.debug) {
+        console.log('Event queued for offline processing:', { name, properties: eventProperties });
+      }
+      return;
+    }
+
+    try {
+      await new Promise<void>((resolve, reject) => {
+        mixpanel.track(ANALYTICS_EVENTS[name], eventProperties, {
+          send_immediately: true
+        }, (response: any) => {
+          if (response === 1) {
+            resolve();
+          } else {
+            reject(new Error('Failed to track event'));
+          }
+        });
+      });
 
       if (ANALYTICS_CONFIG.debug) {
         console.log('Event tracked:', { name, properties: eventProperties });
       }
     } catch (error) {
       console.error('Failed to track event:', error);
+      this.queueEvent(name, eventProperties);
+      throw error;
     }
   }
 

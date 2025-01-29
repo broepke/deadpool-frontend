@@ -6,7 +6,6 @@ import { PickDetail } from '../../api/types';
 import { LoadingSpinner } from '../../components/common/LoadingSpinner';
 import { isValidCelebrityName, sanitizeCelebrityName } from '../../utils/validation';
 import { useAnalytics } from '../../services/analytics/provider';
-import { ANALYTICS_EVENTS } from '../../services/analytics/constants';
 
 export default function DraftPage() {
   const auth = useAuth();
@@ -33,13 +32,13 @@ export default function DraftPage() {
         .slice(0, 10);
       setPicks(sortedPicks);
 
-      analytics.trackEvent(ANALYTICS_EVENTS.LEADERBOARD_VIEW, {
+      analytics.trackEvent('LEADERBOARD_VIEW', {
         year: currentYear,
         picks_count: sortedPicks.length
       });
     } catch (err) {
       setError('Failed to load draft history');
-      analytics.trackEvent(ANALYTICS_EVENTS.ERROR_OCCURRED, {
+      analytics.trackEvent('ERROR_OCCURRED', {
         error_type: 'api_error',
         error_message: 'Failed to load draft history',
         endpoint: 'getAll'
@@ -60,7 +59,7 @@ export default function DraftPage() {
 
         // Track when it's the current user's turn
         if (auth.user?.profile.sub === nextDrafter.id) {
-          analytics.trackEvent(ANALYTICS_EVENTS.DRAFT_PICK, {
+          analytics.trackEvent('DRAFT_PICK', {
             event_type: 'turn_start',
             player_name: nextDrafter.name
           });
@@ -68,7 +67,7 @@ export default function DraftPage() {
       }
     } catch (err) {
       setError('Failed to fetch next drafter');
-      analytics.trackEvent(ANALYTICS_EVENTS.ERROR_OCCURRED, {
+      analytics.trackEvent('ERROR_OCCURRED', {
         error_type: 'api_error',
         error_message: 'Failed to fetch next drafter',
         endpoint: 'getNextDrafter'
@@ -105,7 +104,7 @@ export default function DraftPage() {
       setValidationError(errorMessage);
       
       // Track validation error
-      analytics.trackEvent(ANALYTICS_EVENTS.FORM_ERROR, {
+      analytics.trackEvent('FORM_ERROR', {
         form: 'draft_pick',
         field: 'celebrity_name',
         error: errorMessage,
@@ -124,7 +123,7 @@ export default function DraftPage() {
       setValidationError(errorMessage);
       
       // Track validation error
-      analytics.trackEvent(ANALYTICS_EVENTS.FORM_ERROR, {
+      analytics.trackEvent('FORM_ERROR', {
         form: 'draft_pick',
         field: 'celebrity_name',
         error: errorMessage,
@@ -141,7 +140,7 @@ export default function DraftPage() {
       });
       
       // Track successful pick
-      analytics.trackEvent(ANALYTICS_EVENTS.DRAFT_PICK_SUBMIT, {
+      analytics.trackEvent('DRAFT_PICK_SUBMIT', {
         player_id: currentDrafter.id,
         player_name: currentDrafter.name,
         celebrity_name: sanitizedName
@@ -160,7 +159,7 @@ export default function DraftPage() {
       setError(errorMessage);
       
       // Track submission error
-      analytics.trackEvent(ANALYTICS_EVENTS.ERROR_OCCURRED, {
+      analytics.trackEvent('ERROR_OCCURRED', {
         error_type: 'api_error',
         error_message: errorMessage,
         endpoint: 'draftPerson',
