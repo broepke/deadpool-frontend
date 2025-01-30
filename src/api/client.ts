@@ -2,8 +2,21 @@ import axios, { AxiosError, AxiosInstance, InternalAxiosRequestConfig } from 'ax
 import { analytics } from '../services/analytics';
 import { AnalyticsEventName } from '../services/analytics/constants';
 
-// Get the API URL from environment variables, fallback to localhost for development
+// Get environment variables
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+const API_KEY = import.meta.env.VITE_API_KEY;
+const API_TIMEOUT = parseInt(import.meta.env.VITE_API_TIMEOUT || '10000');
+const API_RETRY_ATTEMPTS = parseInt(import.meta.env.VITE_API_RETRY_ATTEMPTS || '3');
+
+if (!API_KEY) {
+  console.error('VITE_API_KEY environment variable is not set');
+}
+
+console.log('API Configuration:', {
+  url: API_URL,
+  timeout: API_TIMEOUT,
+  retryAttempts: API_RETRY_ATTEMPTS
+});
 
 console.log('API Client initialized with base URL:', API_URL);
 
@@ -26,15 +39,17 @@ class ApiClient {
   constructor() {
     this.client = axios.create({
       baseURL: API_URL,
+      timeout: API_TIMEOUT,
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
+        'x-api-key': API_KEY
       },
-      // Add CORS support
-      withCredentials: false,
+      // CORS configuration
+      withCredentials: true
     });
 
-    // Add request interceptor for authentication and logging
+    // Add request interceptor for logging
     this.client.interceptors.request.use(
       (config: InternalAxiosRequestConfig) => {
         // Log the full request URL and params
@@ -46,12 +61,6 @@ class ApiClient {
         if (config.data) {
           console.log('Request data:', config.data);
         }
-
-        // TODO: Add authentication token when auth is implemented
-        // const token = localStorage.getItem('auth_token');
-        // if (token) {
-        //   config.headers.Authorization = `Bearer ${token}`;
-        // }
         return config;
       },
       (error) => {
@@ -60,76 +69,77 @@ class ApiClient {
       }
     );
 
-    // Add response interceptor for error handling and logging
+    // Add response interceptor for error handling, logging, and retries
     this.client.interceptors.response.use(
       (response) => {
-        console.log('Raw Response:', response);
         console.log('Response Status:', response.status);
         console.log('Response Data:', JSON.stringify(response.data, null, 2));
-        return response; // Return the full response to avoid double data extraction
+        return response;
       },
       async (error: AxiosError) => {
+        const config = error.config as any;
+        
+        // Initialize retry count if it doesn't exist
+        if (!config || !config.retry) {
+          config.retry = 0;
+        }
+
+        // Implement retry logic for network errors or 5xx errors
+        if (config.retry < API_RETRY_ATTEMPTS &&
+            (error.code === 'ERR_NETWORK' || (error.response?.status && error.response?.status >= 500))) {
+          config.retry += 1;
+          console.log(`Retrying request (${config.retry}/${API_RETRY_ATTEMPTS})...`);
+          
+          // Add a delay before retrying (exponential backoff)
+          const delay = Math.min(1000 * (2 ** config.retry), 10000);
+          await new Promise(resolve => setTimeout(resolve, delay));
+          
+          return this.client(config);
+        }
+
+        // If we've exhausted retries or it's not a retryable error, handle it
         const errorDetails = getErrorDetails(error);
         
         if (error.response) {
-          // The request was made and the server responded with a status code
-          // that falls out of the range of 2xx
           console.error('Response error:', {
             status: error.response.status,
             data: error.response.data,
-            headers: error.response.headers,
           });
 
           // Track specific error types
           switch (error.response.status) {
             case 401:
-              console.error('Unauthorized access');
+              console.error('Unauthorized access - check API key configuration');
               await analytics.trackEvent('AUTH_ERROR' as AnalyticsEventName, errorDetails);
               break;
             case 403:
-              console.error('Forbidden access');
+              console.error('Forbidden access - check API key permissions');
               await analytics.trackEvent('AUTH_ERROR' as AnalyticsEventName, {
                 ...errorDetails,
                 error_subtype: 'forbidden'
               });
               break;
-            case 404:
-              console.error('Resource not found');
-              await analytics.trackEvent('API_ERROR' as AnalyticsEventName, {
-                ...errorDetails,
-                error_subtype: 'not_found'
-              });
-              break;
-            case 500:
-              console.error('Internal server error');
-              await analytics.trackEvent('API_ERROR' as AnalyticsEventName, {
-                ...errorDetails,
-                error_subtype: 'server_error'
-              });
-              break;
             default:
-              console.error('An error occurred:', error.response.data);
+              console.error('API Error:', error.response.data);
               await analytics.trackEvent('API_ERROR' as AnalyticsEventName, errorDetails);
           }
-        } else if (error.request) {
-          // The request was made but no response was received
-          console.error('No response received:', {
-            request: error.request,
-            config: error.config,
+        } else if (error.code === 'ECONNABORTED') {
+          console.error('Request timeout:', {
+            timeout: API_TIMEOUT,
+            url: config.url
           });
           await analytics.trackEvent('API_ERROR' as AnalyticsEventName, {
             ...errorDetails,
-            error_subtype: 'no_response'
+            error_subtype: 'timeout'
           });
         } else {
-          // Something happened in setting up the request that triggered an Error
-          console.error('Error setting up request:', {
+          console.error('Network Error:', {
             message: error.message,
-            config: error.config,
+            code: error.code
           });
           await analytics.trackEvent('API_ERROR' as AnalyticsEventName, {
             ...errorDetails,
-            error_subtype: 'request_setup'
+            error_subtype: 'network'
           });
         }
 
