@@ -18,6 +18,7 @@ We will implement a comprehensive character validation strategy with the followi
 ### 1. Frontend Validation
 
 Add a utility function for character validation that:
+
 - Allows standard Latin characters (a-z, A-Z)
 - Allows common punctuation (periods, hyphens, apostrophes)
 - Allows spaces for multi-word names
@@ -25,6 +26,7 @@ Add a utility function for character validation that:
 - Provides immediate feedback to users
 
 Example implementation:
+
 ```typescript
 const VALID_NAME_REGEX = /^[a-zA-Z\s\-'.]+$/;
 
@@ -36,25 +38,28 @@ function isValidCelebrityName(name: string): boolean {
 ### 2. Input Sanitization
 
 Add a sanitization function that:
+
 - Normalizes Unicode characters to their closest ASCII equivalents where appropriate
 - Removes any invisible or control characters
 - Standardizes whitespace
 - Maintains proper capitalization
 
 Example implementation:
+
 ```typescript
 function sanitizeCelebrityName(name: string): string {
   return name
     .trim()
-    .normalize('NFKC') // Normalize Unicode characters
-    .replace(/\s+/g, ' ') // Standardize whitespace
-    .replace(/[^\x20-\x7E]/g, ''); // Remove non-printable ASCII characters
+    .normalize("NFKC") // Normalize Unicode characters
+    .replace(/\s+/g, " ") // Standardize whitespace
+    .replace(/[^\x20-\x7E]/g, ""); // Remove non-printable ASCII characters
 }
 ```
 
 ### 3. User Feedback
 
 Enhance the UI to:
+
 - Show real-time validation feedback as users type
 - Clearly indicate which characters are allowed
 - Provide helpful error messages for invalid input
@@ -63,6 +68,7 @@ Enhance the UI to:
 ### 4. Error Handling
 
 Implement proper error handling that:
+
 - Catches and displays validation errors from both frontend and backend
 - Provides clear messages about why input was rejected
 - Suggests corrections when possible
@@ -76,15 +82,18 @@ Implement proper error handling that:
 5. Add unit tests for validation functions
 
 Example DraftPage component changes:
+
 ```typescript
 const handleSubmitPick = async () => {
   const sanitizedName = sanitizeCelebrityName(currentPick);
-  
+
   if (!isValidCelebrityName(sanitizedName)) {
-    setError('Celebrity name contains invalid characters. Please use only letters, spaces, hyphens, and apostrophes.');
+    setError(
+      "Celebrity name contains invalid characters. Please use only letters, spaces, hyphens, and apostrophes."
+    );
     return;
   }
-  
+
   // Proceed with submission...
 };
 ```
@@ -109,10 +118,12 @@ const handleSubmitPick = async () => {
 ## Alternatives Considered
 
 1. **Allow All Unicode Characters**
+
    - Rejected due to potential display and processing issues
    - Would make searching and matching more complex
 
 2. **Strict ASCII-only Validation**
+
    - Rejected as too restrictive for international names
    - Would exclude many valid name characters
 

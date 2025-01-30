@@ -353,59 +353,59 @@ apiClient.interceptors.response.use(
 
 1. Analytics Service Testing:
 
-```typescript
-// src/services/analytics/__tests__/analytics.test.ts
-describe("MixpanelAnalytics", () => {
-  it("should initialize with correct config", () => {
-    const analytics = new MixpanelAnalytics({
-      token: "test-token",
-      enabled: true,
-      debug: true,
-      defaultProperties: {
-        environment: "test",
-      },
+  ```typescript
+  // src/services/analytics/__tests__/analytics.test.ts
+  describe("MixpanelAnalytics", () => {
+    it("should initialize with correct config", () => {
+      const analytics = new MixpanelAnalytics({
+        token: "test-token",
+        enabled: true,
+        debug: true,
+        defaultProperties: {
+          environment: "test",
+        },
+      });
+
+      expect(analytics.isInitialized()).toBe(true);
     });
 
-    expect(analytics.isInitialized()).toBe(true);
-  });
+    it("should not track events when disabled", () => {
+      const analytics = new MixpanelAnalytics({
+        enabled: false,
+        // ... other config
+      });
 
-  it("should not track events when disabled", () => {
-    const analytics = new MixpanelAnalytics({
-      enabled: false,
-      // ... other config
+      const trackSpy = jest.spyOn(analytics, "trackEvent");
+      analytics.trackEvent(ANALYTICS_EVENTS.PAGE_VIEW, {});
+
+      expect(trackSpy).not.toHaveBeenCalled();
     });
-
-    const trackSpy = jest.spyOn(analytics, "trackEvent");
-    analytics.trackEvent(ANALYTICS_EVENTS.PAGE_VIEW, {});
-
-    expect(trackSpy).not.toHaveBeenCalled();
   });
-});
-```
+  ```
 
-2. Integration Testing:
+1. Integration Testing:
 
-```typescript
-// src/features/draft/__tests__/DraftPage.test.tsx
-it("should track draft pick submission", async () => {
-  const trackEvent = jest.fn();
-  const { getByTestId } = render(
-    <AnalyticsContext.Provider value={{ trackEvent }}>
-      <DraftPage />
-    </AnalyticsContext.Provider>
-  );
+  ```typescript
+  // src/features/draft/__tests__/DraftPage.test.tsx
+  it("should track draft pick submission", async () => {
+    const trackEvent = jest.fn();
+    const { getByTestId } = render(
+      <AnalyticsContext.Provider value={{ trackEvent }}>
+        <DraftPage />
+      </AnalyticsContext.Provider>
+    );
 
-  // Simulate draft pick
-  await userEvent.click(getByTestId("submit-pick"));
+    // Simulate draft pick
+    await userEvent.click(getByTestId("submit-pick"));
 
-  expect(trackEvent).toHaveBeenCalledWith(
-    ANALYTICS_EVENTS.DRAFT_PICK,
-    expect.objectContaining({
-      player_id: expect.any(String),
-    })
-  );
-});
-```
+    expect(trackEvent).toHaveBeenCalledWith(
+      ANALYTICS_EVENTS.DRAFT_PICK,
+      expect.objectContaining({
+        player_id: expect.any(String),
+      })
+    );
+  });
+  ```
 
 ### Event Naming Convention
 
