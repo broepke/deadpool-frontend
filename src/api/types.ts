@@ -42,25 +42,6 @@ export interface DraftOrder {
 }
 
 // Player Pick Types
-export interface PlayerPick {
-  person_id: string;
-  name: string;
-  age: number;
-  birth_date: string | null;
-  death_date: string | null;
-  timestamp: string;
-  year: number;
-}
-
-export interface PlayerWithPicks {
-  id: string;
-  name: string;
-  draft_order: number;
-  year: number;
-  picks: PlayerPick[];
-  metadata?: Record<string, any>;
-}
-
 export interface PlayerPickUpdate {
   person_id: string;
   year: number;

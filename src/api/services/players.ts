@@ -1,5 +1,5 @@
 import { apiClient } from '../client';
-import { ApiResponse, Player, PlayerUpdate, PlayerWithPicks } from '../types';
+import { ApiResponse, Player, PlayerUpdate, PickDetail } from '../types';
 
 const BASE_PATH = '/api/v1/deadpool/players';
 
@@ -20,8 +20,8 @@ export const playersApi = {
   },
 
   // Get player's picks with their details
-  getPlayerPicks: async (playerId: string, year?: number): Promise<ApiResponse<PlayerWithPicks>> => {
-    return apiClient.get<ApiResponse<PlayerWithPicks>>(`/api/v1/deadpool/player-picks/${playerId}`, { year });
+  getPlayerPicks: async (playerId: string, year?: number): Promise<ApiResponse<PickDetail[]>> => {
+    return apiClient.get<ApiResponse<PickDetail[]>>(`/api/v1/deadpool/player-picks/${playerId}`, { year });
   },
 
   // Update player's pick

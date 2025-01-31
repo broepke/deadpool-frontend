@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import { picksApi, playersApi } from '../../api';
-import { PickDetail, PickCount, Player, PlayerWithPicks } from '../../api/types';
+import { PickDetail, PickCount, Player } from '../../api/types';
 import { LoadingSpinner } from '../../components/common/LoadingSpinner';
 import { useAnalytics } from '../../services/analytics/provider';
 
@@ -74,27 +74,11 @@ export default function PicksPage() {
     const fetchData = async () => {
       try {
         setPicksLoading(true);
-        let picksData: PickDetail[];
-        if (selectedPlayer) {
-          const response = await playersApi.getPlayerPicks(selectedPlayer, selectedYear);
-          const playerData = response.data as PlayerWithPicks;
-          // Convert player picks to PickDetail format
-          picksData = playerData.picks?.map(pick => ({
-            player_id: playerData.id,
-            player_name: playerData.name,
-            draft_order: playerData.draft_order,
-            pick_person_id: pick.person_id,
-            pick_person_name: pick.name,
-            pick_person_age: pick.age,
-            pick_person_birth_date: pick.birth_date,
-            pick_person_death_date: pick.death_date,
-            pick_timestamp: pick.timestamp,
-            year: selectedYear
-          })) || [];
-        } else {
-          const response = await picksApi.getAll(selectedYear);
-          picksData = response.data;
-        }
+        const response = selectedPlayer
+          ? await playersApi.getPlayerPicks(selectedPlayer, selectedYear)
+          : await picksApi.getAll(selectedYear);
+        
+        const picksData = response.data;
         
         // Create a new array with parsed dates for sorting
         const picksWithParsedDates = picksData.map(pick => ({
