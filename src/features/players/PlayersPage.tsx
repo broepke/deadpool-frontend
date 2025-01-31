@@ -1,20 +1,32 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { playersApi } from '../../api';
 import { Player } from '../../api/types';
 import { LoadingSpinner } from '../../components/common/LoadingSpinner';
 import { useAnalytics } from '../../services/analytics/provider';
 
+const AVAILABLE_YEARS = [2025, 2024, 2023];
+
 export default function PlayersPage() {
   const analytics = useAnalytics();
   const [players, setPlayers] = useState<Player[]>([]);
+  const [selectedYear, setSelectedYear] = useState(2025);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const handleYearChange = useCallback((year: number) => {
+    analytics.trackEvent('PLAYER_SEARCH', {
+      filter_type: 'year',
+      value: year,
+      previous_value: selectedYear
+    });
+    setSelectedYear(year);
+  }, [analytics, selectedYear]);
 
   useEffect(() => {
     const fetchPlayers = async () => {
       try {
         setLoading(true);
-        const response = await playersApi.getAll();
+        const response = await playersApi.getAll(selectedYear);
         setPlayers(response.data);
         setError(null);
 
@@ -43,15 +55,31 @@ export default function PlayersPage() {
     };
 
     fetchPlayers();
-  }, [analytics]);
+  }, [analytics, selectedYear]);
 
   return (
     <div>
-      <div>
-        <h1 className="text-2xl font-semibold text-gray-900">Players</h1>
-        <p className="mt-2 text-sm text-gray-700">
-          A list of all players participating in the game.
-        </p>
+      <div className="sm:flex sm:items-center">
+        <div className="sm:flex-auto">
+          <h1 className="text-2xl font-semibold text-gray-900">Players</h1>
+          <p className="mt-2 text-sm text-gray-700">
+            A list of all players participating in the game.
+          </p>
+        </div>
+        <div className="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
+          <select
+            value={selectedYear}
+            onChange={(e) => handleYearChange(Number(e.target.value))}
+            className="block w-full rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6"
+            aria-label="Select year"
+          >
+            {AVAILABLE_YEARS.map((year) => (
+              <option key={year} value={year}>
+                {year}
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
       
       {loading ? (
