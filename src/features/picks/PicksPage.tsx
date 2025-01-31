@@ -86,14 +86,13 @@ export default function PicksPage() {
           parsedDate: pick.pick_timestamp ? new Date(pick.pick_timestamp + 'Z') : null
         }));
 
-        // Sort by parsed dates and limit to 10
+        // Sort by parsed dates
         const sortedPicks = picksWithParsedDates
           .sort((a, b) => {
             if (!a.parsedDate) return 1;
             if (!b.parsedDate) return -1;
             return b.parsedDate.getTime() - a.parsedDate.getTime();
           })
-          .slice(0, 10)
           .map(({ parsedDate, ...pick }) => pick); // Remove the parsedDate field before setting state
 
         setPicks(sortedPicks);

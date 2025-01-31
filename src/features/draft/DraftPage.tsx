@@ -21,20 +21,12 @@ export default function DraftPage() {
 
   const loadPicks = async () => {
     try {
-      const response = await picksApi.getAll(currentYear);
-      // Sort by timestamp in descending order and limit to 10 most recent picks
-      const sortedPicks = response.data
-        .sort((a, b) => {
-          if (!a.pick_timestamp) return 1;
-          if (!b.pick_timestamp) return -1;
-          return new Date(b.pick_timestamp).getTime() - new Date(a.pick_timestamp).getTime();
-        })
-        .slice(0, 10);
-      setPicks(sortedPicks);
+      const response = await picksApi.getAll(currentYear, 10);
+      setPicks(response.data);
 
       analytics.trackEvent('LEADERBOARD_VIEW', {
         year: currentYear,
-        picks_count: sortedPicks.length
+        picks_count: response.data.length
       });
     } catch (err) {
       setError('Failed to load draft history');

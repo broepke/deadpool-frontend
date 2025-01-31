@@ -10,7 +10,7 @@ export const picksApi = {
   },
 
   // Get all picks for a given year with player and picked person details
-  getAll: async (year: number): Promise<ApiResponse<PickDetail[]>> => {
-    return apiClient.get<ApiResponse<PickDetail[]>>(BASE_PATH, { year });
+  getAll: async (year: number, limit?: number): Promise<ApiResponse<PickDetail[]>> => {
+    return apiClient.get<ApiResponse<PickDetail[]>>(BASE_PATH, { year, limit });
   }
 };
