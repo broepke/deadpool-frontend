@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
-import { picksApi } from '../../api';
-import { PickDetail, PickCount } from '../../api/types';
+import { picksApi, playersApi } from '../../api';
+import { PickDetail, PickCount, Player, PlayerWithPicks } from '../../api/types';
 import { LoadingSpinner } from '../../components/common/LoadingSpinner';
 import { useAnalytics } from '../../services/analytics/provider';
 
@@ -10,11 +10,14 @@ export default function PicksPage() {
   const analytics = useAnalytics();
   const [picks, setPicks] = useState<PickDetail[]>([]);
   const [selectedYear, setSelectedYear] = useState(2025);
+  const [selectedPlayer, setSelectedPlayer] = useState<string | null>(null);
+  const [players, setPlayers] = useState<Player[]>([]);
   const [picksLoading, setPicksLoading] = useState(true);
   const [pickCountsLoading, setPickCountsLoading] = useState(true);
   const [pickCounts, setPickCounts] = useState<PickCount[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [picksCountError, setPicksCountError] = useState<string | null>(null);
+  const [playersLoading, setPlayersLoading] = useState(true);
 
   const handleYearChange = useCallback((year: number) => {
     analytics.trackEvent('PICKS_FILTER_CHANGED', {
@@ -25,6 +28,38 @@ export default function PicksPage() {
     });
     setSelectedYear(year);
   }, [analytics, selectedYear]);
+
+  const handlePlayerChange = useCallback((playerId: string | null) => {
+    analytics.trackEvent('PICKS_FILTER_CHANGED', {
+      filter_type: 'player',
+      value: playerId,
+      previous_value: selectedPlayer
+    });
+    setSelectedPlayer(playerId);
+  }, [analytics, selectedPlayer]);
+
+  // Fetch players
+  useEffect(() => {
+    const fetchPlayers = async () => {
+      try {
+        setPlayersLoading(true);
+        const response = await playersApi.getAll(selectedYear);
+        setPlayers(response.data);
+      } catch (err) {
+        console.error('Failed to fetch players:', err);
+        analytics.trackEvent('API_ERROR', {
+          error_type: 'api_error',
+          endpoint: 'getAll',
+          year: selectedYear,
+          component: 'PicksPage'
+        });
+      } finally {
+        setPlayersLoading(false);
+      }
+    };
+
+    fetchPlayers();
+  }, [selectedYear, analytics]);
 
   const handlePickClick = useCallback((pick: PickDetail) => {
     analytics.trackEvent('PICKS_ROW_CLICKED', {
@@ -39,10 +74,30 @@ export default function PicksPage() {
     const fetchData = async () => {
       try {
         setPicksLoading(true);
-        const response = await picksApi.getAll(selectedYear);
+        let picksData: PickDetail[];
+        if (selectedPlayer) {
+          const response = await playersApi.getPlayerPicks(selectedPlayer, selectedYear);
+          const playerData = response.data as PlayerWithPicks;
+          // Convert player picks to PickDetail format
+          picksData = playerData.picks?.map(pick => ({
+            player_id: playerData.id,
+            player_name: playerData.name,
+            draft_order: playerData.draft_order,
+            pick_person_id: pick.person_id,
+            pick_person_name: pick.name,
+            pick_person_age: pick.age,
+            pick_person_birth_date: pick.birth_date,
+            pick_person_death_date: pick.death_date,
+            pick_timestamp: pick.timestamp,
+            year: selectedYear
+          })) || [];
+        } else {
+          const response = await picksApi.getAll(selectedYear);
+          picksData = response.data;
+        }
         
         // Create a new array with parsed dates for sorting
-        const picksWithParsedDates = response.data.map(pick => ({
+        const picksWithParsedDates = picksData.map(pick => ({
           ...pick,
           parsedDate: pick.pick_timestamp ? new Date(pick.pick_timestamp + 'Z') : null
         }));
@@ -94,7 +149,7 @@ export default function PicksPage() {
     };
 
     fetchData();
-  }, [selectedYear, analytics]);
+  }, [selectedYear, selectedPlayer, analytics]);
 
   // Separate effect for fetching pick counts
   useEffect(() => {
@@ -146,18 +201,38 @@ export default function PicksPage() {
             A list of all celebrity picks and their current status.
           </p>
         </div>
-        <div className="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
-          <select
-            value={selectedYear}
-            onChange={(e) => handleYearChange(Number(e.target.value))}
-            className="block w-full rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6"
-          >
-            {AVAILABLE_YEARS.map((year) => (
-              <option key={year} value={year}>
-                {year}
-              </option>
-            ))}
-          </select>
+        <div className="mt-4 sm:ml-16 sm:mt-0 sm:flex-none flex gap-4">
+          <div className="flex gap-4">
+            <select
+              value={selectedYear}
+              onChange={(e) => handleYearChange(Number(e.target.value))}
+              className="block w-full rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6"
+            >
+              {AVAILABLE_YEARS.map((year) => (
+                <option key={year} value={year}>
+                  {year}
+                </option>
+              ))}
+            </select>
+            {playersLoading ? (
+              <div className="w-48 h-9 flex items-center justify-center bg-gray-50 border border-gray-300 rounded-md">
+                <LoadingSpinner size="sm" />
+              </div>
+            ) : (
+              <select
+                value={selectedPlayer || ''}
+                onChange={(e) => handlePlayerChange(e.target.value || null)}
+                className="block w-48 rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6"
+              >
+                <option value="">All Players</option>
+                {players.map((player) => (
+                  <option key={player.id} value={player.id}>
+                    {player.name}
+                  </option>
+                ))}
+              </select>
+            )}
+          </div>
         </div>
       </div>
       
