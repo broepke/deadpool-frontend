@@ -78,12 +78,14 @@ export default function PicksPage() {
         setPicksLoading(true);
         let picksData: PickDetail[];
         const params = {
+          year: selectedYear,
           page: currentPage,
-          page_size: pageSize,
-          ...(selectedPlayer ? { player_id: selectedPlayer } : {})
+          page_size: pageSize
         };
         
-        const response = await picksApi.getAll(selectedYear, params);
+        const response = selectedPlayer
+          ? await picksApi.getPlayerPicks(selectedPlayer, params)
+          : await picksApi.getAll(params);
         
         picksData = response.data;
         setPicks(picksData);

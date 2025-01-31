@@ -1,19 +1,25 @@
 import { apiClient } from '../client';
-import { ApiResponse, PickDetail, PickCount, PaginationParams } from '../types';
+import { ApiResponse, PickDetail, PaginationParams } from '../types';
 
 const BASE_PATH = '/api/v1/deadpool/picks';
 
 export const picksApi = {
-  // Get pick counts for a given year
-  getPickCounts: async (year: number): Promise<ApiResponse<PickCount[]>> => {
-    return apiClient.get<ApiResponse<PickCount[]>>(`${BASE_PATH}-counts`, { year });
+  /**
+   * Get all picks with optional filtering and pagination
+   * @param params Optional parameters including year (defaults to current year), 
+   * limit, page (default=1), and page_size (default=10)
+   */
+  getAll: async (params?: PaginationParams): Promise<ApiResponse<PickDetail[]>> => {
+    return apiClient.get<ApiResponse<PickDetail[]>>(BASE_PATH, params);
   },
 
-  // Get picks for a given year with player and picked person details
-  getAll: async (year: number, params?: Omit<PaginationParams, 'year'>): Promise<ApiResponse<PickDetail[]>> => {
-    return apiClient.get<ApiResponse<PickDetail[]>>(BASE_PATH, {
-      ...params,
-      year
-    });
+  /**
+   * Get picks for a specific player with optional filtering and pagination
+   * @param playerId The ID of the player to get picks for
+   * @param params Optional parameters including year (defaults to current year),
+   * limit, page (default=1), and page_size (default=10)
+   */
+  getPlayerPicks: async (playerId: string, params?: Omit<PaginationParams, 'player_id'>): Promise<ApiResponse<PickDetail[]>> => {
+    return apiClient.get<ApiResponse<PickDetail[]>>(`${BASE_PATH}/${playerId}`, params);
   }
 };
