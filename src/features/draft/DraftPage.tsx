@@ -21,7 +21,7 @@ export default function DraftPage() {
 
   const loadPicks = async () => {
     try {
-      const response = await picksApi.getAll(currentYear, 10);
+      const response = await picksApi.getAll(currentYear, { page: 1, page_size: 10 });
       setPicks(response.data);
 
       analytics.trackEvent('LEADERBOARD_VIEW', {
