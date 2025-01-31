@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import { picksApi, playersApi } from '../../api';
-import { PickDetail, PickCount, Player } from '../../api/types';
+import { PickDetail, PickCount, Player, PlayerWithPicks, PaginationMeta } from '../../api/types';
 import { LoadingSpinner } from '../../components/common/LoadingSpinner';
 import { useAnalytics } from '../../services/analytics/provider';
 
@@ -18,6 +18,9 @@ export default function PicksPage() {
   const [error, setError] = useState<string | null>(null);
   const [picksCountError, setPicksCountError] = useState<string | null>(null);
   const [playersLoading, setPlayersLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize] = useState(10);
+  const [paginationMeta, setPaginationMeta] = useState<PaginationMeta | null>(null);
 
   const handleYearChange = useCallback((year: number) => {
     analytics.trackEvent('PICKS_FILTER_CHANGED', {
@@ -26,10 +29,12 @@ export default function PicksPage() {
       previous_value: selectedYear,
       total_years_available: AVAILABLE_YEARS.length
     });
+    setCurrentPage(1); // Reset to first page when year changes
     setSelectedYear(year);
   }, [analytics, selectedYear]);
 
   const handlePlayerChange = useCallback((playerId: string | null) => {
+    setCurrentPage(1); // Reset to first page when player changes
     analytics.trackEvent('PICKS_FILTER_CHANGED', {
       filter_type: 'player',
       value: playerId,
@@ -74,11 +79,27 @@ export default function PicksPage() {
     const fetchData = async () => {
       try {
         setPicksLoading(true);
-        const response = selectedPlayer
-          ? await playersApi.getPlayerPicks(selectedPlayer, selectedYear)
-          : await picksApi.getAll(selectedYear);
-        
-        const picksData = response.data;
+        let picksData: PickDetail[];
+        if (selectedPlayer) {
+          const response = await playersApi.getPlayerPicks(selectedPlayer, selectedYear);
+          const playerData = response.data as PlayerWithPicks;
+          // Convert player picks to PickDetail format
+          picksData = playerData.picks?.map(pick => ({
+            player_id: playerData.id,
+            player_name: playerData.name,
+            draft_order: playerData.draft_order,
+            pick_person_id: pick.person_id,
+            pick_person_name: pick.name,
+            pick_person_age: pick.age,
+            pick_person_birth_date: pick.birth_date,
+            pick_person_death_date: pick.death_date,
+            pick_timestamp: pick.timestamp,
+            year: selectedYear
+          })) || [];
+        } else {
+          const response = await picksApi.getAll(selectedYear);
+          picksData = response.data;
+        }
         
         // Create a new array with parsed dates for sorting
         const picksWithParsedDates = picksData.map(pick => ({
@@ -86,23 +107,26 @@ export default function PicksPage() {
           parsedDate: pick.pick_timestamp ? new Date(pick.pick_timestamp + 'Z') : null
         }));
 
-        // Sort by parsed dates
+        // Sort by parsed dates and limit to 10
         const sortedPicks = picksWithParsedDates
           .sort((a, b) => {
             if (!a.parsedDate) return 1;
             if (!b.parsedDate) return -1;
             return b.parsedDate.getTime() - a.parsedDate.getTime();
           })
+          .slice(0, 10)
           .map(({ parsedDate, ...pick }) => pick); // Remove the parsedDate field before setting state
 
         setPicks(sortedPicks);
         setError(null);
 
         // Calculate pick statistics
-        const totalPicks = sortedPicks.length;
-        const deceasedPicks = sortedPicks.filter(pick => pick.pick_person_death_date).length;
+        const totalPicks = picksData.length;
+        const deceasedPicks = picksData.filter((pick: PickDetail) => pick.pick_person_death_date).length;
         const alivePicks = totalPicks - deceasedPicks;
-        const averageAge = sortedPicks.reduce((sum, pick) => sum + (pick.pick_person_age || 0), 0) / totalPicks;
+        const averageAge = totalPicks > 0
+          ? picksData.reduce((sum: number, pick: PickDetail) => sum + (pick.pick_person_age || 0), 0) / totalPicks
+          : 0;
 
         // Track successful picks load with statistics
         analytics.trackEvent('PICKS_LOAD_SUCCESS', {
@@ -132,7 +156,18 @@ export default function PicksPage() {
     };
 
     fetchData();
-  }, [selectedYear, selectedPlayer, analytics]);
+  }, [selectedYear, selectedPlayer, currentPage, analytics]);
+
+  const handlePageChange = useCallback((newPage: number) => {
+    analytics.trackEvent('PICKS_FILTER_CHANGED', {
+      filter_type: 'page',
+      previous_page: currentPage,
+      new_page: newPage,
+      year: selectedYear,
+      page_size: pageSize
+    });
+    setCurrentPage(newPage);
+  }, [analytics, currentPage, selectedYear, pageSize]);
 
   // Separate effect for fetching pick counts
   useEffect(() => {
@@ -301,6 +336,63 @@ export default function PicksPage() {
               </div>
             </div>
           </div>
+          
+          {/* Pagination Controls */}
+          {paginationMeta && (
+            <div className="mt-4 flex items-center justify-between border-t border-gray-200 bg-white px-4 py-3 sm:px-6">
+              <div className="flex flex-1 justify-between sm:hidden">
+                <button
+                  onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
+                  disabled={currentPage === 1}
+                  className="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Previous
+                </button>
+                <button
+                  onClick={() => handlePageChange(Math.min(paginationMeta.total_pages, currentPage + 1))}
+                  disabled={currentPage === paginationMeta.total_pages}
+                  className="relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Next
+                </button>
+              </div>
+              <div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
+                <div>
+                  <p className="text-sm text-gray-700">
+                    Showing <span className="font-medium">{((currentPage - 1) * pageSize) + 1}</span> to{' '}
+                    <span className="font-medium">
+                      {Math.min(currentPage * pageSize, paginationMeta.total)}
+                    </span> of{' '}
+                    <span className="font-medium">{paginationMeta.total}</span> results
+                  </p>
+                </div>
+                <div>
+                  <nav className="isolate inline-flex -space-x-px rounded-md shadow-sm" aria-label="Pagination">
+                    <button
+                      onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
+                      disabled={currentPage === 1}
+                      className="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <span className="sr-only">Previous</span>
+                      <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                        <path fillRule="evenodd" d="M12.79 5.23a.75.75 0 01-.02 1.06L8.832 10l3.938 3.71a.75.75 0 11-1.04 1.08l-4.5-4.25a.75.75 0 010-1.08l4.5-4.25a.75.75 0 011.06.02z" clipRule="evenodd" />
+                      </svg>
+                    </button>
+                    <button
+                      onClick={() => handlePageChange(Math.min(paginationMeta.total_pages, currentPage + 1))}
+                      disabled={currentPage === paginationMeta.total_pages}
+                      className="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <span className="sr-only">Next</span>
+                      <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                        <path fillRule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clipRule="evenodd" />
+                      </svg>
+                    </button>
+                  </nav>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       )}
 
