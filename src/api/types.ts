@@ -1,7 +1,28 @@
+// Pagination Types
+export interface PaginationMeta {
+  total: number;
+  page: number;
+  page_size: number;
+  total_pages: number;
+}
+
 // Base Response Types
 export interface ApiResponse<T> {
   message: string;
   data: T;
+  total?: number;
+  page?: number;
+  page_size?: number;
+  total_pages?: number;
+}
+
+// API Parameter Types
+export interface PaginationParams {
+  page?: number;
+  page_size?: number;
+  limit?: number;
+  player_id?: string;  // Optional filter by player
+  year?: number;       // Optional filter by year
 }
 
 // Player Types
