@@ -99,27 +99,27 @@ If deployment fails, check:
 
 ```text
 src/
-├── api/              # API client and services
-│   ├── client.ts     # Base API client configuration
-│   ├── services/     # Service-specific API endpoints
-│   └── types.ts      # API type definitions
-├── components/       # Reusable UI components
-│   └── common/       # Shared components like LoadingSpinner
-├── features/         # Feature-specific components
-│   ├── auth/         # Authentication
-│   ├── draft/        # Draft interface
-│   ├── leaderboard/  # Standings and scores
-│   ├── people/       # People management
-│   ├── picks/        # Celebrity picks
-│   ├── players/      # Player management
-│   └── profile/      # User profile
-├── layouts/          # Layout components
-├── services/         # Core services
-│   └── analytics/    # Analytics integration with error tracking
-├── utils/            # Utility functions
-└── docs/             # Architecture documentation
-    ├── adr-*.md      # Architecture Decision Records
-    └── loading-indicator-pattern.md  # UI patterns
+├── api/                                # API client and services
+│   ├── client.ts                       # Base API client configuration
+│   ├── services/                       # Service-specific API endpoints
+│   └── types.ts                        # API type definitions
+├── components/                         # Reusable UI components
+│   └── common/                         # Shared components like LoadingSpinner
+├── features/                           # Feature-specific components
+│   ├── auth/                           # Authentication
+│   ├── draft/                          # Draft interface
+│   ├── leaderboard/                    # Standings and scores
+│   ├── people/                         # People management
+│   ├── picks/                          # Celebrity picks
+│   ├── players/                        # Player management
+│   └── profile/                        # User profile
+├── layouts/                            # Layout components
+├── services/                           # Core services
+│   └── analytics/                      # Analytics integration with error tracking
+├── utils/                              # Utility functions
+└── docs/                               # Architecture documentation
+    ├── adr-*.md                        # Architecture Decision Records
+    └── loading-indicator-pattern.md    # UI patterns
 ```
 
 ## Technology Stack
