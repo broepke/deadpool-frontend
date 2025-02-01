@@ -100,17 +100,26 @@ If deployment fails, check:
 ```text
 src/
 ├── api/              # API client and services
+│   ├── client.ts     # Base API client configuration
+│   ├── services/     # Service-specific API endpoints
+│   └── types.ts      # API type definitions
 ├── components/       # Reusable UI components
+│   └── common/       # Shared components like LoadingSpinner
 ├── features/         # Feature-specific components
 │   ├── auth/         # Authentication
 │   ├── draft/        # Draft interface
 │   ├── leaderboard/  # Standings and scores
+│   ├── people/       # People management
 │   ├── picks/        # Celebrity picks
 │   ├── players/      # Player management
 │   └── profile/      # User profile
 ├── layouts/          # Layout components
-├── services/         # Core services (analytics, etc.)
-└── utils/            # Utility functions
+├── services/         # Core services
+│   └── analytics/    # Analytics integration with error tracking
+├── utils/            # Utility functions
+└── docs/             # Architecture documentation
+    ├── adr-*.md      # Architecture Decision Records
+    └── loading-indicator-pattern.md  # UI patterns
 ```
 
 ## Technology Stack
@@ -123,6 +132,31 @@ src/
 - OIDC for authentication
 - Mixpanel for analytics
 - Vitest for testing
+
+## Architecture Documentation
+
+The project includes several Architecture Decision Records (ADRs) in the `docs/` directory:
+
+- Admin Draft Mode Implementation
+- Analytics Integration and Error Tracking
+- Character Validation Approach
+- Cross-Platform Architecture
+- Loading Indicator Pattern
+
+These documents provide detailed context and reasoning behind key architectural decisions.
+
+## UI Patterns
+
+### Loading Indicator
+
+The application implements a standardized loading indicator pattern (`LoadingSpinner`) for consistent user experience during async operations. This pattern is documented in `docs/loading-indicator-pattern.md`.
+
+### Analytics Integration
+
+The analytics service provides:
+- Automatic error tracking for API calls
+- Configurable event tracking
+- Type-safe analytics implementation
 
 ## Maintenance
 
@@ -143,4 +177,3 @@ npm run type-check
 ```bash
 npm test          # Run tests
 npm run test:coverage  # Generate coverage report
-```
