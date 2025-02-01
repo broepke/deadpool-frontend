@@ -5,6 +5,7 @@ import PicksPage from './features/picks/PicksPage';
 import LeaderboardPage from './features/leaderboard/LeaderboardPage';
 import DraftPage from './features/draft/DraftPage';
 import ProfilePage from './features/profile/ProfilePage';
+import PeoplePage from './features/people/PeoplePage';
 import AuthGuard from './features/auth/AuthGuard';
 import { AnalyticsProvider } from './services/analytics/provider';
 
@@ -21,6 +22,7 @@ function App() {
               <Route path="leaderboard" element={<LeaderboardPage />} />
               <Route path="draft" element={<DraftPage />} />
               <Route path="profile" element={<ProfilePage />} />
+              <Route path="people" element={<PeoplePage />} />
               <Route path="*" element={<Navigate to="/draft" replace />} />
             </Route>
           </Route>

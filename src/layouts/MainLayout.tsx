@@ -10,6 +10,7 @@ const navigation = [
   { name: 'Leaderboard', href: '/leaderboard' },
   { name: 'Picks', href: '/picks' },
   { name: 'Players', href: '/players' },
+  { name: 'People', href: '/people' },
 ];
 
 export default function MainLayout() {

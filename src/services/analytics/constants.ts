@@ -21,6 +21,9 @@ export type AnalyticsEventName =
   | 'PICKS_LOAD_ERROR'
   | 'PICK_COUNTS_LOAD_SUCCESS'
   | 'PICK_COUNTS_LOAD_ERROR'
+  | 'PEOPLE_FILTER_CHANGED'
+  | 'PEOPLE_LOAD_SUCCESS'
+  | 'PEOPLE_LOAD_ERROR'
   | 'FORM_SUBMIT'
   | 'FORM_ERROR'
   | 'ERROR_OCCURRED'
@@ -63,6 +66,11 @@ export const ANALYTICS_EVENTS: Record<AnalyticsEventName, string> = {
   PICKS_LOAD_ERROR: 'picks_load_error',
   PICK_COUNTS_LOAD_SUCCESS: 'pick_counts_load_success',
   PICK_COUNTS_LOAD_ERROR: 'pick_counts_load_error',
+
+  // People Events
+  PEOPLE_FILTER_CHANGED: 'people_filter_changed',
+  PEOPLE_LOAD_SUCCESS: 'people_load_success',
+  PEOPLE_LOAD_ERROR: 'people_load_error',
 
   // Form Events
   FORM_SUBMIT: 'form_submit',
@@ -117,4 +125,20 @@ export interface ErrorEventProperties extends CommonEventProperties {
   error_message: string;
   error_code?: number | string;
   error_stack?: string;
+}
+
+export interface PeopleEventProperties extends CommonEventProperties {
+  total_people?: number;
+  current_page_people?: number;
+  deceased_count?: number;
+  alive_count?: number;
+  has_data?: boolean;
+  filter_type?: string;
+  value?: any;
+  previous_value?: any;
+  status_filter?: 'all' | 'deceased' | 'alive';
+  page?: number;
+  page_size?: number;
+  previous_page?: number;
+  new_page?: number;
 }

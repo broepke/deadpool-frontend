@@ -42,17 +42,38 @@ export interface PlayerUpdate {
 }
 
 // Person Types
+export interface PersonMetadata {
+  BirthDate: string;
+  DeathDate?: string;
+  WikiID: string;
+  WikiPage: string;
+  Age: number;
+}
+
 export interface Person {
   id: string;
   name: string;
-  status: string;
-  metadata?: Record<string, any>;
+  status: 'deceased' | 'alive';
+  metadata?: PersonMetadata;
 }
 
 export interface PersonUpdate {
   name?: string;
-  status?: string;
+  status?: 'deceased' | 'alive';
+  death_date?: string;
   metadata?: Record<string, any>;
+}
+
+export interface PeopleQueryParams extends PaginationParams {
+  status?: 'deceased' | 'alive';
+}
+
+export interface PaginatedPeopleResponse {
+  data: Person[];
+  total: number;
+  page: number;
+  page_size: number;
+  total_pages: number;
 }
 
 // Draft Order Types
