@@ -24,6 +24,8 @@ export type AnalyticsEventName =
   | 'PEOPLE_FILTER_CHANGED'
   | 'PEOPLE_LOAD_SUCCESS'
   | 'PEOPLE_LOAD_ERROR'
+  | 'PERSON_PICKS_LOAD_SUCCESS'
+  | 'PERSON_PICKS_LOAD_ERROR'
   | 'FORM_SUBMIT'
   | 'FORM_ERROR'
   | 'ERROR_OCCURRED'
@@ -71,6 +73,8 @@ export const ANALYTICS_EVENTS: Record<AnalyticsEventName, string> = {
   PEOPLE_FILTER_CHANGED: 'people_filter_changed',
   PEOPLE_LOAD_SUCCESS: 'people_load_success',
   PEOPLE_LOAD_ERROR: 'people_load_error',
+  PERSON_PICKS_LOAD_SUCCESS: 'person_picks_load_success',
+  PERSON_PICKS_LOAD_ERROR: 'person_picks_load_error',
 
   // Form Events
   FORM_SUBMIT: 'form_submit',

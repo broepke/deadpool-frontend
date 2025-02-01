@@ -1,10 +1,19 @@
-import { useEffect, useState, useCallback } from 'react';
-import { peopleApi } from '../../api';
-import { Person, PaginationMeta } from '../../api/types';
+import React, { useEffect, useState, useCallback } from 'react';
+import { peopleApi, picksApi } from '../../api';
+import { Person, PaginationMeta, PickDetail } from '../../api/types';
 import { LoadingSpinner } from '../../components/common/LoadingSpinner';
 import { useAnalytics } from '../../services/analytics/provider';
 
 type StatusFilter = 'all' | 'deceased' | 'alive';
+
+interface PersonPicks {
+  [personId: string]: {
+    picks: PickDetail[] | null;
+    loading: boolean;
+    error: string | null;
+    visible: boolean;
+  }
+}
 
 export default function PeoplePage() {
   const analytics = useAnalytics();
@@ -15,6 +24,71 @@ export default function PeoplePage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize] = useState(10);
   const [paginationMeta, setPaginationMeta] = useState<PaginationMeta | null>(null);
+  const [personPicks, setPersonPicks] = useState<PersonPicks>({});
+
+  const handleFetchPicks = useCallback(async (personId: string) => {
+    // If picks are already visible, hide them
+    if (personPicks[personId]?.visible) {
+      setPersonPicks(prev => ({
+        ...prev,
+        [personId]: { ...prev[personId], visible: false }
+      }));
+      return;
+    }
+
+    // If we already have the picks data, just show it
+    if (personPicks[personId]?.picks) {
+      setPersonPicks(prev => ({
+        ...prev,
+        [personId]: { ...prev[personId], visible: true }
+      }));
+      return;
+    }
+
+    // Initialize loading state
+    setPersonPicks(prev => ({
+      ...prev,
+      [personId]: { picks: null, loading: true, error: null, visible: true }
+    }));
+
+    try {
+      const response = await picksApi.getPicksByPerson(personId);
+      
+      analytics.trackEvent('PERSON_PICKS_LOAD_SUCCESS', {
+        person_id: personId,
+        picks_count: response.data.length
+      });
+
+      setPersonPicks(prev => ({
+        ...prev,
+        [personId]: {
+          picks: response.data,
+          loading: false,
+          error: null,
+          visible: true
+        }
+      }));
+    } catch (err) {
+      console.error('Failed to fetch picks:', err);
+      const errorMessage = 'Failed to load picks. Please try again.';
+      
+      analytics.trackEvent('PERSON_PICKS_LOAD_ERROR', {
+        person_id: personId,
+        error_type: 'api_error',
+        error_message: errorMessage
+      });
+
+      setPersonPicks(prev => ({
+        ...prev,
+        [personId]: {
+          picks: null,
+          loading: false,
+          error: errorMessage,
+          visible: true
+        }
+      }));
+    }
+  }, [analytics, personPicks]);
 
   const handleStatusChange = useCallback((status: StatusFilter) => {
     analytics.trackEvent('PEOPLE_FILTER_CHANGED', {
@@ -154,45 +228,91 @@ export default function PeoplePage() {
                       <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
                         Death Date
                       </th>
+                      <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                        Picks
+                      </th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-200 bg-white">
                     {people.length === 0 ? (
                       <tr>
-                        <td colSpan={5} className="text-center py-4 text-sm text-gray-500">
+                        <td colSpan={6} className="text-center py-4 text-sm text-gray-500">
                           No people found.
                         </td>
                       </tr>
                     ) : (
                       people.map((person) => (
-                        <tr
-                          key={person.id}
-                          className="hover:bg-gray-50"
-                        >
-                          <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
-                            {person.name}
-                          </td>
-                          <td className="whitespace-nowrap px-3 py-4 text-sm">
-                            <span
-                              className={`inline-flex rounded-full px-2 text-xs font-semibold leading-5 ${
-                                person.status === 'deceased'
-                                  ? 'bg-red-100 text-red-800'
-                                  : 'bg-green-100 text-green-800'
-                              }`}
-                            >
-                              {person.status === 'deceased' ? 'Deceased' : 'Alive'}
-                            </span>
-                          </td>
-                          <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                            {person.metadata?.Age || 'N/A'}
-                          </td>
-                          <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                            {formatDate(person.metadata?.BirthDate)}
-                          </td>
-                          <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                            {formatDate(person.metadata?.DeathDate)}
-                          </td>
-                        </tr>
+                        <React.Fragment key={person.id}>
+                          <tr className="hover:bg-gray-50">
+                            <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
+                              {person.name}
+                            </td>
+                            <td className="whitespace-nowrap px-3 py-4 text-sm">
+                              <span
+                                className={`inline-flex rounded-full px-2 text-xs font-semibold leading-5 ${
+                                  person.status === 'deceased'
+                                    ? 'bg-red-100 text-red-800'
+                                    : 'bg-green-100 text-green-800'
+                                }`}
+                              >
+                                {person.status === 'deceased' ? 'Deceased' : 'Alive'}
+                              </span>
+                            </td>
+                            <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                              {person.metadata?.Age || 'N/A'}
+                            </td>
+                            <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                              {formatDate(person.metadata?.BirthDate)}
+                            </td>
+                            <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                              {formatDate(person.metadata?.DeathDate)}
+                            </td>
+                            <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                              <button
+                                onClick={() => handleFetchPicks(person.id)}
+                                className="inline-flex items-center px-2.5 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                              >
+                                {personPicks[person.id]?.loading ? (
+                                  <LoadingSpinner size="sm" />
+                                ) : personPicks[person.id]?.visible ? (
+                                  'Hide Picks'
+                                ) : (
+                                  'Show Picks'
+                                )}
+                              </button>
+                            </td>
+                          </tr>
+                          {personPicks[person.id]?.visible && (
+                            <tr className="bg-gray-50">
+                              <td colSpan={6} className="px-6 py-4">
+                                {personPicks[person.id]?.error ? (
+                                  <div className="text-red-600 text-sm">{personPicks[person.id].error}</div>
+                                ) : personPicks[person.id]?.picks?.length === 0 ? (
+                                  <div className="text-gray-500 text-sm">No picks found for this person.</div>
+                                ) : (
+                                  <div className="space-y-2">
+                                    <h4 className="text-sm font-medium text-gray-900">Picks for {person.name}</h4>
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                      {personPicks[person.id]?.picks?.map((pick) => (
+                                        <div key={pick.player_id} className="bg-white p-3 rounded-md shadow-sm border border-gray-200">
+                                          <div className="text-sm font-medium text-gray-900">
+                                            Picked by {pick.player_name}
+                                          </div>
+                                          <div className="mt-1 text-sm text-gray-500">
+                                            Draft Order: {pick.draft_order}
+                                          </div>
+                                          <div className="mt-1 text-sm text-gray-500">
+                                            Pick Date: {new Date(pick.pick_timestamp || '').toLocaleDateString()}
+                                          </div>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </div>
+                                )}
+                              </td>
+                            </tr>
+                          )}
+                        </React.Fragment>
                       ))
                     )}
                   </tbody>
