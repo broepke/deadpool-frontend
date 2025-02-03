@@ -5,10 +5,33 @@ import { Bars3Icon, XMarkIcon, UserCircleIcon } from '@heroicons/react/24/outlin
 import { useAuth } from 'react-oidc-context';
 import { useAnalytics } from '../services/analytics/provider';
 
-const navigation = [
+interface NavItem {
+  name: string;
+  href?: string;
+}
+
+interface NavLink extends NavItem {
+  href: string;
+}
+
+interface NavMenu extends NavItem {
+  type: 'menu';
+  items: NavLink[];
+}
+
+type NavigationItem = NavLink | NavMenu;
+
+const navigation: NavigationItem[] = [
   { name: 'Draft', href: '/draft' },
   { name: 'Leaderboard', href: '/leaderboard' },
-  { name: 'Picks', href: '/picks' },
+  {
+    name: 'Picks',
+    type: 'menu',
+    items: [
+      { name: 'All Picks', href: '/picks' },
+      { name: 'Pick Counts', href: '/picks/counts' }
+    ]
+  },
   { name: 'Players', href: '/players' },
   { name: 'People', href: '/people' },
 ];
@@ -81,13 +104,47 @@ export default function MainLayout() {
                   <div className="hidden md:block">
                     <div className="ml-10 flex items-baseline space-x-4">
                       {navigation.map((item) => (
-                        <Link
-                          key={item.name}
-                          to={item.href}
-                          className="text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium"
-                        >
-                          {item.name}
-                        </Link>
+                        'type' in item && item.type === 'menu' ? (
+                          <Menu as="div" key={item.name} className="relative">
+                            <Menu.Button className="text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium">
+                              {item.name}
+                            </Menu.Button>
+                            <Transition
+                              as={React.Fragment}
+                              enter="transition ease-out duration-100"
+                              enterFrom="transform opacity-0 scale-95"
+                              enterTo="transform opacity-100 scale-100"
+                              leave="transition ease-in duration-75"
+                              leaveFrom="transform opacity-100 scale-100"
+                              leaveTo="transform opacity-0 scale-95"
+                            >
+                              <Menu.Items className="absolute left-0 z-10 mt-2 w-48 origin-top-left rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                                {item.items.map((subItem) => (
+                                  <Menu.Item key={subItem.name}>
+                                    {({ active }) => (
+                                      <Link
+                                        to={subItem.href}
+                                        className={`${
+                                          active ? 'bg-gray-100' : ''
+                                        } block px-4 py-2 text-sm text-gray-700`}
+                                      >
+                                        {subItem.name}
+                                      </Link>
+                                    )}
+                                  </Menu.Item>
+                                ))}
+                              </Menu.Items>
+                            </Transition>
+                          </Menu>
+                        ) : (
+                          <Link
+                            key={item.name}
+                            to={item.href as string}
+                            className="text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium"
+                          >
+                            {item.name}
+                          </Link>
+                        )
                       ))}
                     </div>
                   </div>
@@ -156,13 +213,30 @@ export default function MainLayout() {
             <Disclosure.Panel className="md:hidden">
               <div className="space-y-1 px-2 pb-3 pt-2 sm:px-3">
                 {navigation.map((item) => (
-                  <Link
-                    key={item.name}
-                    to={item.href}
-                    className="text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium"
-                  >
-                    {item.name}
-                  </Link>
+                  'type' in item && item.type === 'menu' ? (
+                    <div key={item.name} className="space-y-1">
+                      <div className="text-gray-500 px-3 py-2 text-base font-medium">
+                        {item.name}
+                      </div>
+                      {item.items.map((subItem) => (
+                        <Link
+                          key={subItem.name}
+                          to={subItem.href}
+                          className="text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-6 py-2 text-base font-medium"
+                        >
+                          {subItem.name}
+                        </Link>
+                      ))}
+                    </div>
+                  ) : (
+                    <Link
+                      key={item.name}
+                      to={item.href as string}
+                      className="text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium"
+                    >
+                      {item.name}
+                    </Link>
+                  )
                 ))}
               </div>
               <div className="border-t border-gray-700 pb-3 pt-4">

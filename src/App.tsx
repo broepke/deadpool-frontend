@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import MainLayout from './layouts/MainLayout';
 import PlayersPage from './features/players/PlayersPage';
 import PicksPage from './features/picks/PicksPage';
+import PickCountsPage from './features/picks/PickCountsPage';
 import LeaderboardPage from './features/leaderboard/LeaderboardPage';
 import DraftPage from './features/draft/DraftPage';
 import ProfilePage from './features/profile/ProfilePage';
@@ -19,6 +20,7 @@ function App() {
               <Route index element={<Navigate to="/draft" replace />} />
               <Route path="players" element={<PlayersPage />} />
               <Route path="picks" element={<PicksPage />} />
+              <Route path="picks/counts" element={<PickCountsPage />} />
               <Route path="leaderboard" element={<LeaderboardPage />} />
               <Route path="draft" element={<DraftPage />} />
               <Route path="profile" element={<ProfilePage />} />

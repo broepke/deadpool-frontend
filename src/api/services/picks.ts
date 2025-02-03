@@ -1,5 +1,5 @@
 import { apiClient } from '../client';
-import { ApiResponse, PickDetail, PaginationParams } from '../types';
+import { ApiResponse, PickDetail, PaginationParams, PickCount } from '../types';
 
 const BASE_PATH = '/api/v1/deadpool/picks';
 
@@ -31,5 +31,13 @@ export const picksApi = {
    */
   getPlayerPicks: async (playerId: string, params?: Omit<PaginationParams, 'player_id'>): Promise<ApiResponse<PickDetail[]>> => {
     return apiClient.get<ApiResponse<PickDetail[]>>(`${BASE_PATH}/${playerId}`, params);
+  },
+
+  /**
+   * Get counts of how many picks each player still needs to make
+   * @param params Optional parameters including year (defaults to current year)
+   */
+  getPicksCounts: async (params?: Pick<PaginationParams, 'year'>): Promise<ApiResponse<PickCount[]>> => {
+    return apiClient.get<ApiResponse<PickCount[]>>(`/api/v1/deadpool/picks-counts`, params);
   }
 };

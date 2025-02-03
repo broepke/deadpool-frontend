@@ -113,7 +113,9 @@ export interface DraftRequest {
 export interface PickCount {
   player_id: string;
   player_name: string;
+  draft_order: number;
   pick_count: number;
+  year: number;
 }
 
 // Leaderboard Types
