@@ -64,7 +64,7 @@ export default function PickCountsPage() {
           </thead>
           <tbody className="divide-y divide-gray-200 bg-white">
             {pickCounts.map((count) => (
-              <tr key={count.player_id} className={count.pick_count === 0 ? 'bg-green-50' : ''}>
+              <tr key={count.player_id} className={count.pick_count !== 20 ? 'bg-yellow-50' : ''}>
                 <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
                   {count.draft_order}
                 </td>
