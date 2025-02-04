@@ -7,6 +7,7 @@ import LeaderboardPage from './features/leaderboard/LeaderboardPage';
 import DraftPage from './features/draft/DraftPage';
 import ProfilePage from './features/profile/ProfilePage';
 import PeoplePage from './features/people/PeoplePage';
+import ReviewerProfilePage from './features/public-profile/ReviewerProfilePage';
 import AuthGuard from './features/auth/AuthGuard';
 import { AnalyticsProvider } from './services/analytics/provider';
 
@@ -15,6 +16,10 @@ function App() {
     <Router>
       <AnalyticsProvider>
         <Routes>
+          {/* Public routes */}
+          <Route path="/review/profile" element={<ReviewerProfilePage />} />
+
+          {/* Protected routes */}
           <Route element={<AuthGuard />}>
             <Route path="/" element={<MainLayout />}>
               <Route index element={<Navigate to="/draft" replace />} />
