@@ -31,13 +31,20 @@ export interface Player {
   name: string;
   draft_order: number;
   year: number;
+  phone_number?: string;
+  phone_verified?: boolean;
+  sms_notifications_enabled?: boolean;
   metadata?: Record<string, any>;
 }
 
 export interface PlayerUpdate {
-  name?: string;
+  first_name?: string;
+  last_name?: string;
   draft_order?: number;
   year?: number;
+  phone_number?: string;
+  phone_verified?: boolean;
+  sms_notifications_enabled?: boolean;
   metadata?: Record<string, any>;
 }
 

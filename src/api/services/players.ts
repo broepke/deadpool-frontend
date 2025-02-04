@@ -14,9 +14,9 @@ export const playersApi = {
     return apiClient.get<ApiResponse<Player>>(`${BASE_PATH}/${playerId}`, { year });
   },
 
-  // Update or create a player
-  update: async (playerId: string, data: PlayerUpdate): Promise<ApiResponse<Player[]>> => {
-    return apiClient.put<ApiResponse<Player[]>>(`${BASE_PATH}/${playerId}`, data);
+  // Update player profile
+  update: async (playerId: string, data: PlayerUpdate): Promise<ApiResponse<void>> => {
+    return apiClient.put<ApiResponse<void>>(`${BASE_PATH}/${playerId}/profile`, data);
   },
 
   // Get player's picks with their details
