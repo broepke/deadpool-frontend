@@ -121,13 +121,26 @@ export default function ProfilePage() {
 
   const handleInputChange = (field: string, value: string | boolean) => {
     if (field === 'phone_number' && typeof value === 'string') {
-      const formattedNumber = formatPhoneNumber(value);
-      const validationError = formattedNumber ? getPhoneNumberError(formattedNumber) : null;
-      setPhoneError(validationError);
-      setFormData(prev => ({
-        ...prev,
-        [field]: formattedNumber
-      }));
+      // Get the current phone number
+      const currentNumber = formData.phone_number || '';
+      
+      // If deleting (new value is shorter), don't format
+      if (value.length < currentNumber.length) {
+        setPhoneError(null); // Clear error while deleting
+        setFormData(prev => ({
+          ...prev,
+          [field]: value
+        }));
+      } else {
+        // Only format when adding characters
+        const formattedNumber = formatPhoneNumber(value);
+        const validationError = formattedNumber ? getPhoneNumberError(formattedNumber) : null;
+        setPhoneError(validationError);
+        setFormData(prev => ({
+          ...prev,
+          [field]: formattedNumber
+        }));
+      }
     } else {
       setFormData(prev => ({
         ...prev,
