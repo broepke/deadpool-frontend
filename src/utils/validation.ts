@@ -56,14 +56,18 @@ export function formatPhoneNumber(input: string): string {
   
   // If we have a complete number (10+ digits)
   if (digitsOnly.length >= 10) {
-    // For complete numbers, ensure proper format
-    const withCountryCode = digitsOnly.length === 10
-      ? `1${digitsOnly}` // Add US country code for 10-digit numbers
-      : digitsOnly;      // Keep as-is for international numbers
+    // Check if we already have a country code (11+ digits or starts with +1)
+    const hasCountryCode = digitsOnly.length > 10 || (hasPlus && cleaned.startsWith('+1'));
+    
+    // Only add country code if it's exactly 10 digits and doesn't have one
+    const withCountryCode = (digitsOnly.length === 10 && !hasCountryCode)
+      ? `1${digitsOnly}` // Add US country code
+      : digitsOnly;      // Keep as-is if already has country code or international
+    
     return `+${withCountryCode}`;
   }
   
-  // During typing, just return cleaned input
+  // During typing, just return cleaned input without adding +
   return hasPlus ? cleaned : `+${cleaned}`;
 }
 
