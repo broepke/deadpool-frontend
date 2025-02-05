@@ -4,6 +4,7 @@ import { useAnalytics } from "../../services/analytics/provider";
 import { playersApi } from "../../api/services/players";
 import { PlayerUpdate } from "../../api/types";
 import { LoadingSpinner } from "../../components/common/LoadingSpinner";
+import { formatPhoneNumber, getPhoneNumberError } from "../../utils/validation";
 
 export default function ProfilePage() {
   const auth = useAuth();
@@ -12,6 +13,7 @@ export default function ProfilePage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [phoneError, setPhoneError] = useState<string | null>(null);
   const [formData, setFormData] = useState<PlayerUpdate & { fullName: string }>({
     fullName: '',
     first_name: '',
@@ -68,6 +70,11 @@ export default function ProfilePage() {
 
   const handleSubmit = async () => {
     if (!auth.user?.profile.sub) return;
+    
+    if (!validateForm()) {
+      setError('Please fix the validation errors before submitting');
+      return;
+    }
 
     try {
       setIsSaving(true);
@@ -113,10 +120,29 @@ export default function ProfilePage() {
   };
 
   const handleInputChange = (field: string, value: string | boolean) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value
-    }));
+    if (field === 'phone_number' && typeof value === 'string') {
+      const formattedNumber = formatPhoneNumber(value);
+      const validationError = formattedNumber ? getPhoneNumberError(formattedNumber) : null;
+      setPhoneError(validationError);
+      setFormData(prev => ({
+        ...prev,
+        [field]: formattedNumber
+      }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        [field]: value
+      }));
+    }
+  };
+
+  const validateForm = (): boolean => {
+    if (formData.phone_number) {
+      const phoneValidationError = getPhoneNumberError(formData.phone_number);
+      setPhoneError(phoneValidationError);
+      if (phoneValidationError) return false;
+    }
+    return true;
   };
 
   if (!auth.isAuthenticated) {
@@ -251,11 +277,27 @@ export default function ProfilePage() {
                 disabled={!isEditing}
                 value={formData.phone_number || ''}
                 onChange={(e) => handleInputChange('phone_number', e.target.value)}
-                className={`block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 ${
+                className={`block w-full rounded-md shadow-sm focus:ring-blue-500 ${
+                  phoneError
+                    ? 'border-red-300 focus:border-red-500'
+                    : 'border-gray-300 focus:border-blue-500'
+                } ${
                   !isEditing ? 'bg-gray-50 disabled:cursor-not-allowed' : 'bg-white'
                 }`}
+                placeholder="+12223334444"
               />
             </div>
+            {isEditing && (
+              <div className="mt-1">
+                {phoneError ? (
+                  <p className="text-sm text-red-600">{phoneError}</p>
+                ) : (
+                  <p className="text-sm text-gray-500">
+                    Enter phone number in format: +1 (US) followed by area code and number
+                  </p>
+                )}
+              </div>
+            )}
           </div>
 
           <div className="flex items-center space-x-3">
