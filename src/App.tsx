@@ -1,6 +1,8 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import MainLayout from './layouts/MainLayout';
 import PlayersPage from './features/players/PlayersPage';
+import TermsPage from './features/terms/TermsPage';
+import PrivacyPage from './features/privacy/PrivacyPage';
 import PicksPage from './features/picks/PicksPage';
 import PickCountsPage from './features/picks/PickCountsPage';
 import LeaderboardPage from './features/leaderboard/LeaderboardPage';
@@ -18,6 +20,8 @@ function App() {
         <Routes>
           {/* Public routes */}
           <Route path="/review/profile" element={<ReviewerProfilePage />} />
+          <Route path="/terms" element={<TermsPage />} />
+          <Route path="/privacy" element={<PrivacyPage />} />
 
           {/* Protected routes */}
           <Route element={<AuthGuard />}>
