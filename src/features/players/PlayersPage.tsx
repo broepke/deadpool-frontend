@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
+import { CheckCircleIcon, XCircleIcon } from '@heroicons/react/20/solid';
 import { playersApi } from '../../api';
 import { Player } from '../../api/types';
 import { LoadingSpinner } from '../../components/common/LoadingSpinner';
@@ -105,12 +106,21 @@ export default function PlayersPage() {
                       <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
                         Year
                       </th>
+                      <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                        Phone Number
+                      </th>
+                      <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                        Phone Verified
+                      </th>
+                      <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                        SMS Notifications
+                      </th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-200 bg-white">
                     {players.length === 0 ? (
                       <tr>
-                        <td colSpan={3} className="text-center py-4 text-sm text-gray-500">
+                        <td colSpan={6} className="text-center py-4 text-sm text-gray-500">
                           No players added yet.
                           {/* Track empty state when rendered */}
                           {(() => {
@@ -135,6 +145,23 @@ export default function PlayersPage() {
                           </td>
                           <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                             {player.year}
+                          </td>
+                          <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                            {player.phone_number || '-'}
+                          </td>
+                          <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                            {player.phone_verified ? (
+                              <CheckCircleIcon className="h-5 w-5 text-green-500" aria-label="Verified" />
+                            ) : (
+                              <XCircleIcon className="h-5 w-5 text-red-500" aria-label="Not verified" />
+                            )}
+                          </td>
+                          <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                            {player.sms_notifications_enabled ? (
+                              <CheckCircleIcon className="h-5 w-5 text-green-500" aria-label="Enabled" />
+                            ) : (
+                              <XCircleIcon className="h-5 w-5 text-red-500" aria-label="Disabled" />
+                            )}
                           </td>
                         </tr>
                       ))
