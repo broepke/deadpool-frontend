@@ -1,8 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from "react-oidc-context";
 import { draftApi } from '../../api/services/draft';
-import { picksApi } from '../../api/services/picks';
-import { PickDetail } from '../../api/types';
 import { LoadingSpinner } from '../../components/common/LoadingSpinner';
 import { isValidCelebrityName, sanitizeCelebrityName } from '../../utils/validation';
 import { useAnalytics } from '../../services/analytics/provider';
@@ -10,34 +8,12 @@ import { useAnalytics } from '../../services/analytics/provider';
 export default function DraftPage() {
   const auth = useAuth();
   const analytics = useAnalytics();
-  const [picks, setPicks] = useState<PickDetail[]>([]);
   const [currentPick, setCurrentPick] = useState('');
   const [currentDrafter, setCurrentDrafter] = useState<{ id: string; name: string } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [validationError, setValidationError] = useState<string | null>(null);
-  const currentYear = new Date().getFullYear();
-
-  const loadPicks = async () => {
-    try {
-      const response = await picksApi.getAll({ year: currentYear, page: 1, page_size: 10 });
-      setPicks(response.data);
-
-      analytics.trackEvent('LEADERBOARD_VIEW', {
-        year: currentYear,
-        picks_count: response.data.length
-      });
-    } catch (err) {
-      setError('Failed to load draft history');
-      analytics.trackEvent('ERROR_OCCURRED', {
-        error_type: 'api_error',
-        error_message: 'Failed to load draft history',
-        endpoint: 'getAll'
-      });
-      console.error(err);
-    }
-  };
 
   const fetchNextDrafter = async () => {
     try {
@@ -80,10 +56,7 @@ export default function DraftPage() {
     const loadInitialData = async () => {
       setIsLoading(true);
       try {
-        await Promise.all([
-          fetchNextDrafter(),
-          loadPicks()
-        ]);
+        await fetchNextDrafter();
       } finally {
         setIsLoading(false);
       }
@@ -150,9 +123,6 @@ export default function DraftPage() {
       setValidationError(null);
       // Fetch the next drafter after successful submission
       await fetchNextDrafter();
-      
-      // Reload the picks to show the updated history
-      await loadPicks();
     } catch (err: any) {
       // Extract the detailed error message if available
       const errorMessage = err.response?.data?.detail || 'Failed to submit pick';
@@ -295,60 +265,6 @@ export default function DraftPage() {
             )}
           </div>
         )}
-      </div>
-
-      {/* Draft History */}
-      <div className="mt-8">
-        <h2 className="text-lg font-medium text-gray-900">Draft History</h2>
-        <div className="mt-4 overflow-hidden shadow ring-1 ring-black ring-opacity-5 sm:rounded-lg">
-          <table className="min-w-full divide-y divide-gray-300">
-            <thead className="bg-gray-50">
-              <tr>
-                <th scope="col" className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">
-                  Pick #
-                </th>
-                <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                  Player
-                </th>
-                <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                  Celebrity
-                </th>
-                <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                  Time
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200 bg-white">
-              {picks.length === 0 ? (
-                <tr>
-                  <td colSpan={4} className="text-center py-4 text-sm text-gray-500">
-                    No picks made yet.
-                  </td>
-                </tr>
-              ) : (
-                picks.map((pick) => (
-                  <tr key={pick.player_id + pick.pick_timestamp}>
-                    <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
-                      {pick.draft_order}
-                    </td>
-                    <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                      {pick.player_name}
-                    </td>
-                    <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                      {pick.pick_person_name || 'N/A'}
-                    </td>
-                    <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                      {pick.pick_timestamp ? new Date(pick.pick_timestamp + 'Z').toLocaleString(undefined, {
-                        dateStyle: 'short',
-                        timeStyle: 'short'
-                      }) : 'N/A'}
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
       </div>
     </div>
   );
