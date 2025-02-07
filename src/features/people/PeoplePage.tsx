@@ -181,8 +181,8 @@ export default function PeoplePage() {
     <div>
       <div className="sm:flex sm:items-center">
         <div className="sm:flex-auto">
-          <h1 className="text-2xl font-semibold text-gray-900">People</h1>
-          <p className="mt-2 text-sm text-gray-700">
+          <h1 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">People</h1>
+          <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">
             A list of all people and their current status.
           </p>
         </div>
@@ -190,7 +190,7 @@ export default function PeoplePage() {
           <select
             value={selectedStatus}
             onChange={(e) => handleStatusChange(e.target.value as StatusFilter)}
-            className="block w-full rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6"
+            className="block w-full rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800 ring-1 ring-inset ring-gray-300 dark:ring-gray-700 focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6"
           >
             <option value="all">All Statuses</option>
             <option value="alive">Alive</option>
@@ -204,73 +204,73 @@ export default function PeoplePage() {
           <LoadingSpinner size="lg" />
         </div>
       ) : error ? (
-        <div className="mt-8 text-center text-red-600">{error}</div>
+        <div className="mt-8 text-center text-red-600 dark:text-red-400">{error}</div>
       ) : (
         <div className="mt-8 flow-root">
           <div className="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
             <div className="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
-              <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 sm:rounded-lg">
-                <table className="min-w-full divide-y divide-gray-300">
-                  <thead className="bg-gray-50">
+              <div className="overflow-hidden shadow ring-1 ring-black dark:ring-gray-700 ring-opacity-5 sm:rounded-lg">
+                <table className="min-w-full divide-y divide-gray-300 dark:divide-gray-700">
+                  <thead className="bg-gray-50 dark:bg-gray-800">
                     <tr>
-                      <th scope="col" className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">
+                      <th scope="col" className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 dark:text-gray-100 sm:pl-6">
                         Name
                       </th>
-                      <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                      <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-gray-100">
                         Status
                       </th>
-                      <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                      <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-gray-100">
                         Age
                       </th>
-                      <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                      <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-gray-100">
                         Birth Date
                       </th>
-                      <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                      <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-gray-100">
                         Death Date
                       </th>
-                      <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                      <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-gray-100">
                         Picks
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-200 bg-white">
+                  <tbody className="divide-y divide-gray-200 dark:divide-gray-700 bg-white dark:bg-gray-900">
                     {people.length === 0 ? (
                       <tr>
-                        <td colSpan={6} className="text-center py-4 text-sm text-gray-500">
+                        <td colSpan={6} className="text-center py-4 text-sm text-gray-500 dark:text-gray-400">
                           No people found.
                         </td>
                       </tr>
                     ) : (
                       people.map((person) => (
                         <React.Fragment key={person.id}>
-                          <tr className="hover:bg-gray-50">
-                            <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
+                          <tr className="hover:bg-gray-50 dark:hover:bg-gray-800">
+                            <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 dark:text-gray-100 sm:pl-6">
                               {person.name}
                             </td>
                             <td className="whitespace-nowrap px-3 py-4 text-sm">
                               <span
                                 className={`inline-flex rounded-full px-2 text-xs font-semibold leading-5 ${
                                   person.status === 'deceased'
-                                    ? 'bg-red-100 text-red-800'
-                                    : 'bg-green-100 text-green-800'
+                                    ? 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300'
+                                    : 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300'
                                 }`}
                               >
                                 {person.status === 'deceased' ? 'Deceased' : 'Alive'}
                               </span>
                             </td>
-                            <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                            <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500 dark:text-gray-400">
                               {person.metadata?.Age || 'N/A'}
                             </td>
-                            <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                            <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500 dark:text-gray-400">
                               {formatDate(person.metadata?.BirthDate)}
                             </td>
-                            <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                            <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500 dark:text-gray-400">
                               {formatDate(person.metadata?.DeathDate)}
                             </td>
-                            <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                            <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500 dark:text-gray-400">
                               <button
                                 onClick={() => handleFetchPicks(person.id)}
-                                className="inline-flex items-center px-2.5 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                                className="inline-flex items-center px-2.5 py-1.5 border border-gray-300 dark:border-gray-600 shadow-sm text-xs font-medium rounded text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-gray-900 focus:ring-indigo-500"
                               >
                                 {personPicks[person.id]?.loading ? (
                                   <LoadingSpinner size="sm" />
@@ -283,25 +283,25 @@ export default function PeoplePage() {
                             </td>
                           </tr>
                           {personPicks[person.id]?.visible && (
-                            <tr className="bg-gray-50">
+                            <tr className="bg-gray-50 dark:bg-gray-800">
                               <td colSpan={6} className="px-6 py-4">
                                 {personPicks[person.id]?.error ? (
-                                  <div className="text-red-600 text-sm">{personPicks[person.id].error}</div>
+                                  <div className="text-red-600 dark:text-red-400 text-sm">{personPicks[person.id].error}</div>
                                 ) : personPicks[person.id]?.picks?.length === 0 ? (
-                                  <div className="text-gray-500 text-sm">No picks found for this person.</div>
+                                  <div className="text-gray-500 dark:text-gray-400 text-sm">No picks found for this person.</div>
                                 ) : (
                                   <div className="space-y-2">
-                                    <h4 className="text-sm font-medium text-gray-900">Picks for {person.name}</h4>
+                                    <h4 className="text-sm font-medium text-gray-900 dark:text-gray-100">Picks for {person.name}</h4>
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                       {personPicks[person.id]?.picks?.map((pick) => (
-                                        <div key={pick.player_id} className="bg-white p-3 rounded-md shadow-sm border border-gray-200">
-                                          <div className="text-sm font-medium text-gray-900">
+                                        <div key={pick.player_id} className="bg-white dark:bg-gray-800 p-3 rounded-md shadow-sm border border-gray-200 dark:border-gray-700">
+                                          <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
                                             Picked by {pick.player_name}
                                           </div>
-                                          <div className="mt-1 text-sm text-gray-500">
+                                          <div className="mt-1 text-sm text-gray-500 dark:text-gray-400">
                                             Draft Order: {pick.draft_order}
                                           </div>
-                                          <div className="mt-1 text-sm text-gray-500">
+                                          <div className="mt-1 text-sm text-gray-500 dark:text-gray-400">
                                             Pick Date: {new Date(pick.pick_timestamp || '').toLocaleDateString()}
                                           </div>
                                         </div>
@@ -323,26 +323,26 @@ export default function PeoplePage() {
           
           {/* Pagination Controls */}
           {paginationMeta && (
-            <div className="mt-4 flex items-center justify-between border border-gray-200 bg-white px-4 py-3 sm:px-6 shadow ring-1 ring-black ring-opacity-5 rounded-lg">
+            <div className="mt-4 flex items-center justify-between border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-3 sm:px-6 shadow ring-1 ring-black dark:ring-gray-700 ring-opacity-5 rounded-lg">
               <div className="flex flex-1 justify-between sm:hidden">
                 <button
                   onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
                   disabled={currentPage === 1}
-                  className="relative inline-flex items-center rounded-md bg-white px-4 py-2 text-sm font-medium text-gray-700 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="relative inline-flex items-center rounded-md bg-white dark:bg-gray-800 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 ring-1 ring-inset ring-gray-300 dark:ring-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Previous
                 </button>
                 <button
                   onClick={() => handlePageChange(Math.min(paginationMeta.total_pages, currentPage + 1))}
                   disabled={currentPage === paginationMeta.total_pages}
-                  className="relative ml-3 inline-flex items-center rounded-md bg-white px-4 py-2 text-sm font-medium text-gray-700 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="relative ml-3 inline-flex items-center rounded-md bg-white dark:bg-gray-800 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 ring-1 ring-inset ring-gray-300 dark:ring-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Next
                 </button>
               </div>
               <div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
                 <div>
-                  <p className="text-sm text-gray-700">
+                  <p className="text-sm text-gray-700 dark:text-gray-300">
                     Showing <span className="font-medium">{((currentPage - 1) * pageSize) + 1}</span> to{' '}
                     <span className="font-medium">
                       {Math.min(currentPage * pageSize, paginationMeta.total)}
@@ -355,7 +355,7 @@ export default function PeoplePage() {
                     <button
                       onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
                       disabled={currentPage === 1}
-                      className="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-700 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-700 dark:text-gray-300 ring-1 ring-inset ring-gray-300 dark:ring-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 focus:z-20 focus:outline-offset-0 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <span className="sr-only">Previous</span>
                       <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
@@ -365,7 +365,7 @@ export default function PeoplePage() {
                     <button
                       onClick={() => handlePageChange(Math.min(paginationMeta.total_pages, currentPage + 1))}
                       disabled={currentPage === paginationMeta.total_pages}
-                      className="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-700 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-700 dark:text-gray-300 ring-1 ring-inset ring-gray-300 dark:ring-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 focus:z-20 focus:outline-offset-0 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <span className="sr-only">Next</span>
                       <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">

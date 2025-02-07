@@ -154,8 +154,8 @@ export default function DraftPage() {
     <div>
       <div className="sm:flex sm:items-center">
         <div className="sm:flex-auto">
-          <h1 className="text-2xl font-semibold text-gray-900">Draft Room</h1>
-          <p className="mt-2 text-sm text-gray-700">
+          <h1 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">Draft Room</h1>
+          <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">
             Make your celebrity picks in turn order.
           </p>
         </div>
@@ -164,37 +164,37 @@ export default function DraftPage() {
       <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
         {/* Error Display */}
         {error && (
-          <div className="col-span-2 rounded-md bg-red-50 p-4">
+          <div className="col-span-2 rounded-md bg-red-50 dark:bg-red-900/30 p-4">
             <div className="flex">
               <div className="flex-shrink-0">
-                <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                <svg className="h-5 w-5 text-red-400 dark:text-red-300" viewBox="0 0 20 20" fill="currentColor">
                   <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
                 </svg>
               </div>
               <div className="ml-3">
-                <h3 className="text-sm font-medium text-red-800">{error}</h3>
+                <h3 className="text-sm font-medium text-red-800 dark:text-red-300">{error}</h3>
               </div>
             </div>
           </div>
         )}
 
         {/* Draft Status and Current Turn */}
-        <div className="card">
-          <h2 className="text-lg font-medium text-gray-900">Current Turn</h2>
+        <div className="card bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
+          <h2 className="text-lg font-medium text-gray-900 dark:text-gray-100">Current Turn</h2>
           <div className="mt-4">
             {currentDrafter ? (
-              <div className="mt-2 p-4 rounded-md bg-blue-50 border border-blue-200">
+              <div className="mt-2 p-4 rounded-md bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-700">
                 <div className="flex items-center justify-between">
-                  <span className="text-lg font-medium text-blue-900">{currentDrafter.name}</span>
-                  <span className="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-sm font-medium text-blue-800">
+                  <span className="text-lg font-medium text-blue-900 dark:text-blue-100">{currentDrafter.name}</span>
+                  <span className="inline-flex items-center rounded-full bg-blue-100 dark:bg-blue-800 px-2.5 py-0.5 text-sm font-medium text-blue-800 dark:text-blue-200">
                     Current Drafter
                   </span>
                 </div>
               </div>
             ) : (
-              <div className="mt-2 p-4 rounded-md bg-gray-50 border border-gray-200">
+              <div className="mt-2 p-4 rounded-md bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600">
                 <div className="flex items-center justify-center">
-                  <span className="text-lg font-medium text-gray-900">No eligible players found</span>
+                  <span className="text-lg font-medium text-gray-900 dark:text-gray-100">No eligible players found</span>
                 </div>
               </div>
             )}
@@ -203,16 +203,16 @@ export default function DraftPage() {
 
         {/* Pick Submission */}
         {currentDrafter && (
-          <div className="card">
-            <h2 className="text-lg font-medium text-gray-900">Make Your Pick</h2>
+          <div className="card bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
+            <h2 className="text-lg font-medium text-gray-900 dark:text-gray-100">Make Your Pick</h2>
             {auth.user?.profile.sub === currentDrafter.id ? (
               <>
-                <p className="mt-2 text-sm text-gray-600">
+                <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
                   It's your turn to draft a celebrity.
                 </p>
                 <div className="mt-4">
                   <div>
-                    <label htmlFor="celebrity" className="block text-sm font-medium text-gray-700">
+                    <label htmlFor="celebrity" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                       Celebrity Name
                     </label>
                     <div className="mt-1">
@@ -221,20 +221,20 @@ export default function DraftPage() {
                         name="celebrity"
                         id="celebrity"
                         className={`block w-full rounded-md shadow-sm sm:text-sm ${
-                          validationError 
-                            ? 'border-red-300 focus:border-red-500 focus:ring-red-500' 
-                            : 'border-gray-300 focus:border-blue-500 focus:ring-blue-500'
-                        }`}
+                          validationError
+                            ? 'border-red-300 dark:border-red-500 focus:border-red-500 focus:ring-red-500'
+                            : 'border-gray-300 dark:border-gray-600 focus:border-blue-500 focus:ring-blue-500'
+                        } bg-white dark:bg-gray-700 dark:text-gray-100`}
                         value={currentPick}
                         onChange={handleInputChange}
                         placeholder="Enter celebrity name"
                       />
                       {validationError && (
-                        <p className="mt-1 text-sm text-red-600">
+                        <p className="mt-1 text-sm text-red-600 dark:text-red-400">
                           {validationError}
                         </p>
                       )}
-                      <p className="mt-1 text-sm text-gray-500">
+                      <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
                         Allowed characters: letters, numbers, spaces, and basic punctuation.
                       </p>
                     </div>
@@ -242,7 +242,7 @@ export default function DraftPage() {
                   <div className="mt-4">
                     <button
                       type="button"
-                      className="btn btn-primary w-full flex justify-center items-center"
+                      className="btn btn-primary w-full flex justify-center items-center bg-blue-500 dark:bg-blue-600 text-white rounded-md hover:bg-blue-600 dark:hover:bg-blue-700 disabled:bg-blue-300 dark:disabled:bg-blue-800 disabled:cursor-not-allowed transition-colors py-2"
                       onClick={handleSubmitPick}
                       disabled={!currentPick.trim() || isSubmitting || !!validationError}
                     >
@@ -259,7 +259,7 @@ export default function DraftPage() {
                 </div>
               </>
             ) : (
-              <p className="mt-2 text-sm text-gray-600">
+              <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
                 Waiting for {currentDrafter.name} to make their pick...
               </p>
             )}

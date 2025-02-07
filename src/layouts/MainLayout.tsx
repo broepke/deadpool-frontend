@@ -89,8 +89,8 @@ export default function MainLayout() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      <Disclosure as="nav" className="bg-gray-800">
+    <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
+      <Disclosure as="nav" className="bg-gray-800 dark:bg-gray-900">
         {({ open }) => (
           <>
             <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -118,15 +118,15 @@ export default function MainLayout() {
                               leaveFrom="transform opacity-100 scale-100"
                               leaveTo="transform opacity-0 scale-95"
                             >
-                              <Menu.Items className="absolute left-0 z-10 mt-2 w-48 origin-top-left rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                              <Menu.Items className="absolute left-0 z-10 mt-2 w-48 origin-top-left rounded-md bg-white dark:bg-gray-800 py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
                                 {item.items.map((subItem) => (
                                   <Menu.Item key={subItem.name}>
                                     {({ active }) => (
                                       <Link
                                         to={subItem.href}
                                         className={`${
-                                          active ? 'bg-gray-100' : ''
-                                        } block px-4 py-2 text-sm text-gray-700`}
+                                          active ? 'bg-gray-100 dark:bg-gray-700' : ''
+                                        } block px-4 py-2 text-sm text-gray-700 dark:text-gray-300`}
                                       >
                                         {subItem.name}
                                       </Link>
@@ -165,8 +165,8 @@ export default function MainLayout() {
                       leaveFrom="transform opacity-100 scale-100"
                       leaveTo="transform opacity-0 scale-95"
                     >
-                      <Menu.Items className="absolute right-0 z-10 mt-2 min-w-[12rem] max-w-xs origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
-                        <div className="px-4 py-2 text-sm text-gray-700 border-b truncate" title={auth.user?.profile.email}>
+                      <Menu.Items className="absolute right-0 z-10 mt-2 min-w-[12rem] max-w-xs origin-top-right rounded-md bg-white dark:bg-gray-800 py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                        <div className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300 border-b dark:border-gray-700 truncate" title={auth.user?.profile.email}>
                           {auth.user?.profile.email}
                         </div>
                         <Menu.Item>
@@ -174,8 +174,8 @@ export default function MainLayout() {
                             <Link
                               to="/profile"
                               className={`${
-                                active ? 'bg-gray-100' : ''
-                              } block px-4 py-2 text-sm text-gray-700`}
+                                active ? 'bg-gray-100 dark:bg-gray-700' : ''
+                              } block px-4 py-2 text-sm text-gray-700 dark:text-gray-300`}
                             >
                               Profile
                             </Link>
@@ -186,8 +186,8 @@ export default function MainLayout() {
                             <button
                               onClick={handleSignOut}
                               className={`${
-                                active ? 'bg-gray-100' : ''
-                              } block w-full text-left px-4 py-2 text-sm text-gray-700`}
+                                active ? 'bg-gray-100 dark:bg-gray-700' : ''
+                              } block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300`}
                             >
                               Sign out
                             </button>
@@ -215,14 +215,14 @@ export default function MainLayout() {
                 {navigation.map((item) => (
                   'type' in item && item.type === 'menu' ? (
                     <div key={item.name} className="space-y-1">
-                      <div className="text-gray-500 px-3 py-2 text-base font-medium">
+                      <div className="text-gray-500 dark:text-gray-400 px-3 py-2 text-base font-medium">
                         {item.name}
                       </div>
                       {item.items.map((subItem) => (
                         <Link
                           key={subItem.name}
                           to={subItem.href}
-                          className="text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-6 py-2 text-base font-medium"
+                          className="text-gray-300 hover:bg-gray-700 dark:hover:bg-gray-600 hover:text-white block rounded-md px-6 py-2 text-base font-medium"
                         >
                           {subItem.name}
                         </Link>
@@ -232,17 +232,17 @@ export default function MainLayout() {
                     <Link
                       key={item.name}
                       to={item.href as string}
-                      className="text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium"
+                      className="text-gray-300 hover:bg-gray-700 dark:hover:bg-gray-600 hover:text-white block rounded-md px-3 py-2 text-base font-medium"
                     >
                       {item.name}
                     </Link>
                   )
                 ))}
               </div>
-              <div className="border-t border-gray-700 pb-3 pt-4">
+              <div className="border-t border-gray-700 dark:border-gray-600 pb-3 pt-4">
                 <div className="flex items-center px-5">
                   <div className="ml-3">
-                    <div className="text-base font-medium leading-none text-white truncate max-w-[calc(100vw-4rem)]" title={auth.user?.profile.email}>
+                    <div className="text-base font-medium leading-none text-white dark:text-gray-200 truncate max-w-[calc(100vw-4rem)]" title={auth.user?.profile.email}>
                        {auth.user?.profile.email}
                     </div>
                   </div>
@@ -250,13 +250,13 @@ export default function MainLayout() {
                 <div className="mt-3 space-y-1 px-2">
                   <Link
                     to="/profile"
-                    className="block rounded-md px-3 py-2 text-base font-medium text-gray-400 hover:bg-gray-700 hover:text-white"
+                    className="block rounded-md px-3 py-2 text-base font-medium text-gray-400 hover:bg-gray-700 dark:hover:bg-gray-600 hover:text-white"
                   >
                     Profile
                   </Link>
                   <button
                     onClick={handleSignOut}
-                    className="block rounded-md px-3 py-2 text-base font-medium text-gray-400 hover:bg-gray-700 hover:text-white w-full text-left"
+                    className="block rounded-md px-3 py-2 text-base font-medium text-gray-400 hover:bg-gray-700 dark:hover:bg-gray-600 hover:text-white w-full text-left"
                   >
                     Sign out
                   </button>

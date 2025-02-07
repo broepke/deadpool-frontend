@@ -61,8 +61,8 @@ export default function LeaderboardPage() {
     <div>
       <div className="sm:flex sm:items-center">
         <div className="sm:flex-auto">
-          <h1 className="text-2xl font-semibold text-gray-900">Leaderboard</h1>
-          <p className="mt-2 text-sm text-gray-700">
+          <h1 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">Leaderboard</h1>
+          <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">
             Current standings and scores for all players.
           </p>
         </div>
@@ -70,7 +70,7 @@ export default function LeaderboardPage() {
           <select
             value={selectedYear}
             onChange={(e) => handleYearChange(Number(e.target.value))}
-            className="block w-full rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6"
+            className="block w-full rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800 ring-1 ring-inset ring-gray-300 dark:ring-gray-700 focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6"
             aria-label="Select year"
           >
             {AVAILABLE_YEARS.map((year) => (
@@ -92,25 +92,25 @@ export default function LeaderboardPage() {
         <div className="mt-8 flow-root">
           <div className="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
             <div className="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
-              <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 sm:rounded-lg">
-                <table className="min-w-full divide-y divide-gray-300">
-                  <thead className="bg-gray-50">
+              <div className="overflow-hidden shadow ring-1 ring-black dark:ring-gray-700 ring-opacity-5 sm:rounded-lg">
+                <table className="min-w-full divide-y divide-gray-300 dark:divide-gray-700">
+                  <thead className="bg-gray-50 dark:bg-gray-800">
                     <tr>
-                      <th scope="col" className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">
+                      <th scope="col" className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 dark:text-gray-100 sm:pl-6">
                         Rank
                       </th>
-                      <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                      <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-gray-100">
                         Player
                       </th>
-                      <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                      <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-gray-100">
                         Score
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-200 bg-white">
+                  <tbody className="divide-y divide-gray-200 dark:divide-gray-700 bg-white dark:bg-gray-900">
                     {leaderboard.length === 0 ? (
                       <tr>
-                        <td colSpan={3} className="text-center py-4 text-sm text-gray-500">
+                        <td colSpan={3} className="text-center py-4 text-sm text-gray-500 dark:text-gray-400">
                           No players on the leaderboard yet.
                           {/* Track empty state when rendered */}
                           {(() => {
@@ -126,7 +126,7 @@ export default function LeaderboardPage() {
                       </tr>
                     ) : (
                       leaderboard.map((entry, index) => (
-                        <tr key={entry.player_id} className={index < 3 ? 'bg-yellow-50' : undefined}>
+                        <tr key={entry.player_id} className={index < 3 ? 'bg-yellow-50 dark:bg-yellow-900/20' : undefined}>
                           <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm sm:pl-6">
                             <span className={`
                               inline-flex items-center justify-center w-6 h-6 rounded-full
@@ -138,10 +138,10 @@ export default function LeaderboardPage() {
                               {index + 1}
                             </span>
                           </td>
-                          <td className="whitespace-nowrap px-3 py-4 text-sm font-medium text-gray-900">
+                          <td className="whitespace-nowrap px-3 py-4 text-sm font-medium text-gray-900 dark:text-gray-100">
                             {entry.player_name}
                           </td>
-                          <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                          <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500 dark:text-gray-400">
                             {entry.score}
                           </td>
                         </tr>
