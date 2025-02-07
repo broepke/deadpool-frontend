@@ -67,17 +67,150 @@ We recommend using Recharts for the following reasons:
   - Returns: Temporal data for various metrics (picks, drafts, etc.)
   - Use Cases: Line charts showing activity over time
 
+Example Request/Response:
+```typescript
+// GET /api/analytics/trends?timeRange=last_30_days&metricType=picks_activity
+{
+  "timeRange": "last_30_days",
+  "metricType": "picks_activity",
+  "interval": "daily"
+}
+
+// Response
+{
+  "data": [
+    {
+      "date": "2025-01-07",
+      "totalPicks": 145,
+      "uniqueUsers": 32,
+      "averagePicksPerUser": 4.53
+    },
+    // ... more daily data points
+  ],
+  "metadata": {
+    "totalDataPoints": 30,
+    "aggregationType": "daily",
+    "lastUpdated": "2025-02-06T20:23:39Z"
+  }
+}
+```
+
 ### 2. Aggregation Endpoints
 - Add `/api/analytics/aggregates` endpoint
   - Parameters: dimension, metric
   - Returns: Grouped data for pie/bar charts
   - Use Cases: Distribution of picks, player selections
 
+Example Request/Response:
+```typescript
+// GET /api/analytics/aggregates?dimension=player_category&metric=pick_count
+{
+  "dimension": "player_category",
+  "metric": "pick_count",
+  "filters": {
+    "timeframe": "current_season"
+  }
+}
+
+// Response
+{
+  "data": [
+    {
+      "category": "Quarterbacks",
+      "pickCount": 450,
+      "percentage": 35.2
+    },
+    {
+      "category": "Running Backs",
+      "pickCount": 380,
+      "percentage": 29.7
+    },
+    // ... other categories
+  ],
+  "metadata": {
+    "totalPicks": 1280,
+    "timeframe": "2024-2025 Season"
+  }
+}
+```
+
 ### 3. Comparison Endpoints
 - Add `/api/analytics/comparisons` endpoint
   - Parameters: entities, metrics
   - Returns: Comparative data
   - Use Cases: Bar charts comparing different metrics
+
+Example Request/Response:
+```typescript
+// GET /api/analytics/comparisons
+{
+  "entities": ["top_5_players"],
+  "metrics": ["draft_position", "actual_performance"],
+  "timeframe": "current_season"
+}
+
+// Response
+{
+  "data": [
+    {
+      "playerName": "Tom Brady",
+      "draftPosition": {
+        "value": 12,
+        "rank": 1
+      },
+      "actualPerformance": {
+        "value": 285.4,
+        "rank": 3
+      }
+    },
+    // ... more player comparisons
+  ],
+  "metadata": {
+    "season": "2024-2025",
+    "lastUpdated": "2025-02-06T20:23:39Z",
+    "metrics": {
+      "draftPosition": {
+        "unit": "position",
+        "description": "Average draft position"
+      },
+      "actualPerformance": {
+        "unit": "points",
+        "description": "Total fantasy points"
+      }
+    }
+  }
+}
+```
+
+### 4. Real-time Draft Analytics Endpoint
+- Add `/api/analytics/draft-insights` endpoint
+  - Provides real-time analytics during draft sessions
+  - Supports WebSocket connections for live updates
+
+Example WebSocket Message:
+```typescript
+// WS: /api/analytics/draft-insights
+{
+  "type": "DRAFT_INSIGHT",
+  "timestamp": "2025-02-06T20:23:39Z",
+  "data": {
+    "roundNumber": 3,
+    "pickNumber": 27,
+    "trendingPositions": [
+      {
+        "position": "WR",
+        "pickPercentage": 42.3,
+        "trend": "increasing"
+      }
+    ],
+    "remainingByTier": {
+      "tier1": 5,
+      "tier2": 12,
+      "tier3": 28
+    }
+  }
+}
+```
 
 ## Additional Recommendations
 
