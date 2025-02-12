@@ -1,5 +1,14 @@
 import { apiClient } from '../client';
-import { ApiResponse, Player, PlayerUpdate, PickDetail } from '../types';
+import {
+  ApiResponse,
+  Player,
+  PlayerUpdate,
+  PickDetail,
+  PhoneVerificationRequest,
+  PhoneVerificationResponse,
+  PhoneCodeVerificationRequest,
+  PhoneCodeVerificationResponse
+} from '../types';
 
 const BASE_PATH = '/api/v1/deadpool/players';
 
@@ -35,6 +44,22 @@ export const playersApi = {
       `/api/v1/deadpool/draft-order/${playerId}`,
       null,
       { year, draft_order: draftOrder }
+    );
+  },
+
+  // Request phone verification code
+  requestPhoneVerification: async (playerId: string, data: PhoneVerificationRequest): Promise<ApiResponse<PhoneVerificationResponse>> => {
+    return apiClient.post<ApiResponse<PhoneVerificationResponse>>(
+      `${BASE_PATH}/${playerId}/phone/request-verification`,
+      data
+    );
+  },
+
+  // Verify phone number with code
+  verifyPhoneCode: async (playerId: string, data: PhoneCodeVerificationRequest): Promise<ApiResponse<PhoneCodeVerificationResponse>> => {
+    return apiClient.post<ApiResponse<PhoneCodeVerificationResponse>>(
+      `${BASE_PATH}/${playerId}/phone/verify`,
+      data
     );
   }
 };

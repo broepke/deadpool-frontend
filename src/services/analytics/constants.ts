@@ -31,7 +31,10 @@ export type AnalyticsEventName =
   | 'ERROR_OCCURRED'
   | 'API_ERROR'
   | 'CLIENT_ERROR'
-  | 'AUTH_ERROR';
+  | 'AUTH_ERROR'
+  | 'PHONE_VERIFICATION_REQUESTED'
+  | 'PHONE_VERIFICATION_COMPLETED'
+  | 'PHONE_VERIFICATION_FAILED';
 
 export const ANALYTICS_EVENTS: Record<AnalyticsEventName, string> = {
   // Page Views
@@ -84,7 +87,12 @@ export const ANALYTICS_EVENTS: Record<AnalyticsEventName, string> = {
   ERROR_OCCURRED: 'error_occurred',
   API_ERROR: 'api_error',
   CLIENT_ERROR: 'client_error',
-  AUTH_ERROR: 'auth_error'
+  AUTH_ERROR: 'auth_error',
+
+  // Phone Verification Events
+  PHONE_VERIFICATION_REQUESTED: 'phone_verification_requested',
+  PHONE_VERIFICATION_COMPLETED: 'phone_verification_completed',
+  PHONE_VERIFICATION_FAILED: 'phone_verification_failed'
 };
 
 // Common property types

@@ -34,6 +34,8 @@ export interface Player {
   phone_number?: string;
   phone_verified?: boolean;
   sms_notifications_enabled?: boolean;
+  phone_verification_id?: string;
+  phone_verification_expires_at?: string;
   metadata?: Record<string, any>;
 }
 
@@ -45,7 +47,29 @@ export interface PlayerUpdate {
   phone_number?: string;
   phone_verified?: boolean;
   sms_notifications_enabled?: boolean;
+  phone_verification_id?: string;
+  phone_verification_expires_at?: string;
   metadata?: Record<string, any>;
+}
+
+// Phone Verification Types
+export interface PhoneVerificationRequest {
+  phone_number: string;
+}
+
+export interface PhoneVerificationResponse {
+  verification_id: string;
+  message_id: string;
+  expires_at: string;
+  phone_number: string;
+}
+
+export interface PhoneCodeVerificationRequest {
+  code: string;
+}
+
+export interface PhoneCodeVerificationResponse {
+  verified: boolean;
 }
 
 // Person Types
