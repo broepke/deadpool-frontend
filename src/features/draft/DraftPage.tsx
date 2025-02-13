@@ -18,7 +18,12 @@ export default function DraftPage() {
   const fetchNextDrafter = async () => {
     try {
       const response = await draftApi.getNextDrafter();
-      if (response.data) {
+      if (response.data.message === "No eligible players found") {
+        setCurrentDrafter(null);
+        analytics.trackEvent('DRAFT_COMPLETE', {
+          event_type: 'no_eligible_players'
+        });
+      } else if (response.data.player_id) {
         const nextDrafter = {
           id: response.data.player_id,
           name: response.data.player_name
@@ -34,20 +39,12 @@ export default function DraftPage() {
         }
       }
     } catch (err: any) {
-      // Handle the specific case of no eligible players
-      if (err.response?.data?.detail === "No eligible players found") {
-        setCurrentDrafter(null);
-        analytics.trackEvent('DRAFT_COMPLETE', {
-          event_type: 'no_eligible_players'
-        });
-      } else {
-        setError('Failed to fetch next drafter');
-        analytics.trackEvent('ERROR_OCCURRED', {
-          error_type: 'api_error',
-          error_message: 'Failed to fetch next drafter',
-          endpoint: 'getNextDrafter'
-        });
-      }
+      setError('Failed to fetch next drafter');
+      analytics.trackEvent('ERROR_OCCURRED', {
+        error_type: 'api_error',
+        error_message: 'Failed to fetch next drafter',
+        endpoint: 'getNextDrafter'
+      });
       console.error(err);
     }
   };
