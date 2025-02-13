@@ -7,7 +7,11 @@ import {
   PhoneVerificationRequest,
   PhoneVerificationResponse,
   PhoneCodeVerificationRequest,
-  PhoneCodeVerificationResponse
+  PhoneCodeVerificationResponse,
+  SnsSubscriptionRequest,
+  SnsSubscriptionResponse,
+  SnsConfirmationRequest,
+  SnsConfirmationResponse
 } from '../types';
 
 const BASE_PATH = '/api/v1/deadpool/players';
@@ -59,6 +63,22 @@ export const playersApi = {
   verifyPhoneCode: async (playerId: string, data: PhoneCodeVerificationRequest): Promise<ApiResponse<PhoneCodeVerificationResponse>> => {
     return apiClient.post<ApiResponse<PhoneCodeVerificationResponse>>(
       `${BASE_PATH}/${playerId}/phone/verify`,
+      data
+    );
+  },
+
+  // Subscribe phone number to SNS
+  subscribeSnsPhone: async (playerId: string, data: SnsSubscriptionRequest): Promise<ApiResponse<SnsSubscriptionResponse>> => {
+    return apiClient.post<ApiResponse<SnsSubscriptionResponse>>(
+      `${BASE_PATH}/${playerId}/phone/sns-subscribe`,
+      data
+    );
+  },
+
+  // Confirm SNS subscription
+  confirmSnsSubscription: async (playerId: string, data: SnsConfirmationRequest): Promise<ApiResponse<SnsConfirmationResponse>> => {
+    return apiClient.post<ApiResponse<SnsConfirmationResponse>>(
+      `${BASE_PATH}/${playerId}/phone/sns-confirm`,
       data
     );
   }

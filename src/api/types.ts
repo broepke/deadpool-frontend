@@ -36,6 +36,8 @@ export interface Player {
   sms_notifications_enabled?: boolean;
   phone_verification_id?: string;
   phone_verification_expires_at?: string;
+  sns_subscription_status?: 'unsubscribed' | 'pending' | 'subscribed';
+  sns_subscription_arn?: string;
   metadata?: Record<string, any>;
 }
 
@@ -49,6 +51,8 @@ export interface PlayerUpdate {
   sms_notifications_enabled?: boolean;
   phone_verification_id?: string;
   phone_verification_expires_at?: string;
+  sns_subscription_status?: 'unsubscribed' | 'pending' | 'subscribed';
+  sns_subscription_arn?: string;
   metadata?: Record<string, any>;
 }
 
@@ -57,11 +61,33 @@ export interface PhoneVerificationRequest {
   phone_number: string;
 }
 
+// SNS Types
+export interface SnsSubscriptionRequest {
+  phone_number: string;
+}
+
+export interface SnsSubscriptionResponse {
+  subscription_status: 'pending' | 'subscribed';
+  requires_confirmation: boolean;
+  subscription_arn?: string;
+}
+
+export interface SnsConfirmationRequest {
+  confirmation_code: string;
+}
+
+export interface SnsConfirmationResponse {
+  subscription_status: 'subscribed';
+  subscription_arn: string;
+}
+
 export interface PhoneVerificationResponse {
   verification_id: string;
   message_id: string;
   expires_at: string;
   phone_number: string;
+  sns_subscription_status: 'unsubscribed' | 'pending' | 'subscribed';
+  requires_subscription: boolean;
 }
 
 export interface PhoneCodeVerificationRequest {
@@ -70,6 +96,8 @@ export interface PhoneCodeVerificationRequest {
 
 export interface PhoneCodeVerificationResponse {
   verified: boolean;
+  sns_subscription_status: 'unsubscribed' | 'pending' | 'subscribed';
+  sns_subscription_arn: string;
 }
 
 // Person Types
