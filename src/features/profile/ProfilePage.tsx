@@ -27,9 +27,7 @@ export default function ProfilePage() {
     phone_verified: false,
     sms_notifications_enabled: false,
     phone_verification_id: '',
-    phone_verification_expires_at: '',
-    sns_subscription_status: 'unsubscribed',
-    sns_subscription_arn: ''
+    phone_verification_expires_at: ''
   });
 
   useEffect(() => {
@@ -258,9 +256,7 @@ setFormData(prev => ({
           ...prev,
           phone_verified: true,
           phone_verification_id: '',
-          phone_verification_expires_at: '',
-          sns_subscription_status: response.data.sns_subscription_status,
-          sns_subscription_arn: response.data.sns_subscription_arn
+          phone_verification_expires_at: ''
         }));
         setShowVerificationInput(false);
         setVerificationCode('');
@@ -503,7 +499,7 @@ setFormData(prev => ({
             <input
               type="checkbox"
               id="smsNotifications"
-              disabled={!isEditing || !formData.phone_verified || formData.sns_subscription_status !== 'subscribed'}
+              disabled={!isEditing || !formData.phone_verified}
               checked={formData.sms_notifications_enabled || false}
               onChange={(e) => handleInputChange('sms_notifications_enabled', e.target.checked)}
               className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600 rounded dark:bg-gray-700"
