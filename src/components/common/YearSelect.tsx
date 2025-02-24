@@ -1,7 +1,7 @@
 import { useAnalytics } from '../../services/analytics/provider';
 import { AnalyticsEventName } from '../../services/analytics/constants';
 
-const AVAILABLE_YEARS = [2025, 2024, 2023];
+const AVAILABLE_YEARS = [2023, 2024, 2025];
 
 interface YearSelectProps {
   selectedYear: number;
@@ -21,14 +21,22 @@ export const YearSelect = ({
   const analytics = useAnalytics();
 
   const handleChange = (year: number) => {
+    // Ensure year is a number and log the value
+    const numericYear = Number(year);
+    console.log('YearSelect change:', {
+      rawValue: year,
+      numericValue: numericYear,
+      type: typeof numericYear
+    });
+    
     if (analyticsEvent) {
       analytics.trackEvent(analyticsEvent, {
         filter_type: 'year',
-        value: year,
+        value: numericYear,
         previous_value: selectedYear
       });
     }
-    onChange(year);
+    onChange(numericYear);
   };
 
   return (

@@ -14,7 +14,9 @@ const DemographicsPage = () => {
 
   useEffect(() => {
     const fetchData = async () => {
+      setLoading(true);
       try {
+        console.log('Fetching demographics data for year:', selectedYear);
         const response = await getDemographics(selectedYear);
         setData(response.data);
         setMetadata(response.metadata);
@@ -28,14 +30,19 @@ const DemographicsPage = () => {
     };
 
     fetchData();
-  }, []);
+  }, [selectedYear]);
 
-  if (loading) {
+  // Show loading state only on initial load
+  if (loading && !data.length) {
     return <LoadingSpinner />;
   }
 
   if (error) {
     return <div className="text-red-600 p-4">{error}</div>;
+  }
+
+  if (!data.length) {
+    return <div className="text-gray-600 p-4">No data available for the selected year.</div>;
   }
 
   return (
@@ -45,8 +52,8 @@ const DemographicsPage = () => {
         <YearSelect
           selectedYear={selectedYear}
           onChange={(year) => {
+            console.log('Year changed to:', year);
             setSelectedYear(year);
-            setLoading(true);
           }}
           analyticsEvent="REPORT_FILTER_CHANGED"
         />

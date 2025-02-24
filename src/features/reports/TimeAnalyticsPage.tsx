@@ -8,7 +8,7 @@ import { YearSelect } from '../../components/common/YearSelect';
 const TimeAnalyticsPage = () => {
   const [data, setData] = useState<TimeAnalyticsResponse['data']>([]);
   const [metadata, setMetadata] = useState<TimeAnalyticsResponse['metadata'] | null>(null);
-  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+  const [selectedYear, setSelectedYear] = useState(2024);
   const [period, setPeriod] = useState<'daily' | 'weekly' | 'monthly'>('monthly');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -30,7 +30,7 @@ const TimeAnalyticsPage = () => {
     };
 
     fetchData();
-  }, [period]);
+  }, [period, selectedYear]);
 
   if (loading) {
     return <LoadingSpinner />;
@@ -102,6 +102,11 @@ const TimeAnalyticsPage = () => {
                 tickFormatter={(value) => new Date(value).toLocaleDateString()}
               />
               <YAxis />
+              <YAxis
+                yAxisId={1}
+                orientation="right"
+                tickFormatter={(value) => `${(value * 100).toFixed(0)}%`}
+              />
               <Tooltip
                 labelFormatter={(value) => new Date(value).toLocaleDateString()}
               />
@@ -145,6 +150,11 @@ const TimeAnalyticsPage = () => {
                 tickFormatter={(value) => new Date(value).toLocaleDateString()}
               />
               <YAxis />
+              <YAxis
+                yAxisId={1}
+                orientation="right"
+                tickFormatter={(value) => `${(value * 100).toFixed(0)}%`}
+              />
               <Tooltip
                 labelFormatter={(value) => new Date(value).toLocaleDateString()}
               />

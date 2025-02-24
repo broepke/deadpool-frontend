@@ -7,11 +7,29 @@ import { YearSelect } from '../../components/common/YearSelect';
 
 const PlayerAnalyticsPage = () => {
   const [data, setData] = useState<PlayerAnalyticsResponse['data']>([]);
+  const [allPlayers, setAllPlayers] = useState<Array<{ player_id: string; player_name: string }>>([]);
   const [metadata, setMetadata] = useState<PlayerAnalyticsResponse['metadata'] | null>(null);
   const [selectedPlayerId, setSelectedPlayerId] = useState<string>('');
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Initial load to get all players
+  useEffect(() => {
+    const fetchAllPlayers = async () => {
+      try {
+        const response = await getPlayerAnalytics(undefined, selectedYear);
+        setAllPlayers(response.data.map(player => ({
+          player_id: player.player_id,
+          player_name: player.player_name
+        })));
+      } catch (err) {
+        console.error('Error fetching all players:', err);
+      }
+    };
+
+    fetchAllPlayers();
+  }, [selectedYear]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -30,14 +48,19 @@ const PlayerAnalyticsPage = () => {
     };
 
     fetchData();
-  }, [selectedPlayerId]);
+  }, [selectedPlayerId, selectedYear]);
 
-  if (loading) {
+  // Show loading state only on initial load
+  if (loading && !data.length) {
     return <LoadingSpinner />;
   }
 
   if (error) {
     return <div className="text-red-600 p-4">{error}</div>;
+  }
+
+  if (!data.length) {
+    return <div className="text-gray-600 p-4">No data available for the selected filters.</div>;
   }
 
   return (
@@ -48,28 +71,26 @@ const PlayerAnalyticsPage = () => {
           <YearSelect
             selectedYear={selectedYear}
             onChange={(year) => {
+              console.log('Year changed to:', year);
               setSelectedYear(year);
-              setLoading(true);
             }}
             analyticsEvent="REPORT_FILTER_CHANGED"
           />
-          {data.length > 1 && (
-            <select
-              value={selectedPlayerId}
-              onChange={(e) => {
-                setSelectedPlayerId(e.target.value);
-                setLoading(true);
-              }}
-              className="rounded-md border border-gray-300 px-3 py-1.5"
-            >
-              <option value="">All Players</option>
-              {data.map((player) => (
-                <option key={player.player_id} value={player.player_id}>
-                  {player.player_name}
-                </option>
-              ))}
-            </select>
-          )}
+          <select
+            value={selectedPlayerId}
+            onChange={(e) => {
+              setSelectedPlayerId(e.target.value);
+              setLoading(true);
+            }}
+            className="rounded-md border border-gray-300 px-3 py-1.5"
+          >
+            <option value="">All Players</option>
+            {allPlayers.map((player) => (
+              <option key={player.player_id} value={player.player_id}>
+                {player.player_name}
+              </option>
+            ))}
+          </select>
         </div>
       </div>
 

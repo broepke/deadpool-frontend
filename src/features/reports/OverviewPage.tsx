@@ -13,7 +13,9 @@ const OverviewPage = () => {
 
   useEffect(() => {
     const fetchData = async () => {
+      setLoading(true);
       try {
+        console.log('Fetching overview data for year:', selectedYear);
         const response = await getOverview(selectedYear);
         setData(response.data);
         setError(null);
@@ -26,9 +28,10 @@ const OverviewPage = () => {
     };
 
     fetchData();
-  }, []);
+  }, [selectedYear]);
 
-  if (loading) {
+  // Show loading state only on initial load
+  if (loading && !data) {
     return <LoadingSpinner />;
   }
 
@@ -37,7 +40,7 @@ const OverviewPage = () => {
   }
 
   if (!data) {
-    return <div className="text-gray-600 p-4">No data available</div>;
+    return <div className="text-gray-600 p-4">No data available for the selected year.</div>;
   }
 
   // Transform age distribution data for the chart
@@ -54,8 +57,8 @@ const OverviewPage = () => {
         <YearSelect
           selectedYear={selectedYear}
           onChange={(year) => {
+            console.log('Year changed to:', year);
             setSelectedYear(year);
-            setLoading(true);
           }}
           analyticsEvent="REPORT_FILTER_CHANGED"
         />

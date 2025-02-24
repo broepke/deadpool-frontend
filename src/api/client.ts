@@ -46,21 +46,21 @@ class ApiClient {
         'x-api-key': API_KEY
       },
       // CORS configuration
-      withCredentials: true
+      withCredentials: false
     });
 
     // Add request interceptor for logging
     this.client.interceptors.request.use(
       (config: InternalAxiosRequestConfig) => {
-        // Log the full request URL and params
+        // Detailed request logging
         const fullUrl = `${config.baseURL || ''}${config.url || ''}`;
-        console.log('Making request to:', fullUrl);
-        if (config.params) {
-          console.log('Request params:', config.params);
-        }
-        if (config.data) {
-          console.log('Request data:', config.data);
-        }
+        // Safe request logging without sensitive information
+        console.log('API Request Details:', {
+          url: fullUrl,
+          method: config.method?.toUpperCase(),
+          params: config.params ? JSON.stringify(config.params, null, 2) : 'none',
+          data: config.data ? JSON.stringify(config.data, null, 2) : 'none'
+        });
         return config;
       },
       (error) => {
@@ -150,7 +150,28 @@ class ApiClient {
 
   // Generic GET request
   async get<T>(url: string, params?: object): Promise<T> {
-    const response = await this.client.get<T>(url, { params });
+    // Log the raw params for debugging
+    console.log('Raw params:', params);
+    
+    // Create axios config with params
+    const config = {
+      params: params,
+      paramsSerializer: {
+        serialize: (params: Record<string, any>) => {
+          const searchParams = new URLSearchParams();
+          Object.entries(params).forEach(([key, value]) => {
+            if (value !== undefined && value !== null) {
+              searchParams.append(key, value.toString());
+            }
+          });
+          const queryString = searchParams.toString();
+          console.log('Serialized params:', queryString);
+          return queryString;
+        }
+      }
+    };
+    
+    const response = await this.client.get<T>(url, config);
     return response.data;
   }
 

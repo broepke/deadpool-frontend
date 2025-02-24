@@ -84,24 +84,27 @@ export interface PlayerAnalyticsResponse {
 }
 
 export const getOverview = async (year?: number) => {
-  const params = year ? { year } : {};
-  return apiClient.get<OverviewResponse>('/api/v1/deadpool/reporting/overview', { params });
+  return apiClient.get<OverviewResponse>('/api/v1/deadpool/reporting/overview', {
+    year: year ? Number(year) : undefined
+  });
 };
 
 export const getTimeAnalytics = async (year?: number, period: 'daily' | 'weekly' | 'monthly' = 'monthly') => {
-  const params = { ...(year ? { year } : {}), period };
-  return apiClient.get<TimeAnalyticsResponse>('/api/v1/deadpool/reporting/trends/time', { params });
+  return apiClient.get<TimeAnalyticsResponse>('/api/v1/deadpool/reporting/trends/time', {
+    year: year ? Number(year) : undefined,
+    period
+  });
 };
 
 export const getDemographics = async (year?: number) => {
-  const params = year ? { year } : {};
-  return apiClient.get<DemographicsResponse>('/api/v1/deadpool/reporting/trends/demographics', { params });
+  return apiClient.get<DemographicsResponse>('/api/v1/deadpool/reporting/trends/demographics', {
+    year: year ? Number(year) : undefined
+  });
 };
 
 export const getPlayerAnalytics = async (playerId?: string, year?: number) => {
-  const params = {
-    ...(playerId ? { player_id: playerId } : {}),
-    ...(year ? { year } : {})
-  };
-  return apiClient.get<PlayerAnalyticsResponse>('/api/v1/deadpool/reporting/player-analytics', { params });
+  return apiClient.get<PlayerAnalyticsResponse>('/api/v1/deadpool/reporting/player-analytics', {
+    player_id: playerId,
+    year: year ? Number(year) : undefined
+  });
 };
