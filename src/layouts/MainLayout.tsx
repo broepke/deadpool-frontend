@@ -34,6 +34,16 @@ const navigation: NavigationItem[] = [
   },
   { name: 'Players', href: '/players' },
   { name: 'People', href: '/people' },
+  {
+    name: 'Reports',
+    type: 'menu',
+    items: [
+      { name: 'Overview', href: '/reports/overview' },
+      { name: 'Time Analytics', href: '/reports/time' },
+      { name: 'Demographics', href: '/reports/demographics' },
+      { name: 'Player Analytics', href: '/reports/player-analytics' }
+    ]
+  },
 ];
 
 export default function MainLayout() {

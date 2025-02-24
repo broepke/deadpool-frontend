@@ -10,6 +10,10 @@ import DraftPage from './features/draft/DraftPage';
 import ProfilePage from './features/profile/ProfilePage';
 import PeoplePage from './features/people/PeoplePage';
 import ReviewerProfilePage from './features/public-profile/ReviewerProfilePage';
+import OverviewPage from './features/reports/OverviewPage';
+import TimeAnalyticsPage from './features/reports/TimeAnalyticsPage';
+import DemographicsPage from './features/reports/DemographicsPage';
+import PlayerAnalyticsPage from './features/reports/PlayerAnalyticsPage';
 import AuthGuard from './features/auth/AuthGuard';
 import { AnalyticsProvider } from './services/analytics/provider';
 
@@ -34,6 +38,12 @@ function App() {
               <Route path="draft" element={<DraftPage />} />
               <Route path="profile" element={<ProfilePage />} />
               <Route path="people" element={<PeoplePage />} />
+              <Route path="reports">
+                <Route path="overview" element={<OverviewPage />} />
+                <Route path="time" element={<TimeAnalyticsPage />} />
+                <Route path="demographics" element={<DemographicsPage />} />
+                <Route path="player-analytics" element={<PlayerAnalyticsPage />} />
+              </Route>
               <Route path="*" element={<Navigate to="/draft" replace />} />
             </Route>
           </Route>
