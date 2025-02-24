@@ -4,6 +4,7 @@ import { getDemographics } from '../../api/services/reporting';
 import type { DemographicsResponse } from '../../api/services/reporting';
 import { LoadingSpinner } from '../../components/common/LoadingSpinner';
 import { YearSelect } from '../../components/common/YearSelect';
+import { useAnalytics } from '../../services/analytics/provider';
 
 const DemographicsPage = () => {
   const [data, setData] = useState<DemographicsResponse['data']>([]);
@@ -11,6 +12,8 @@ const DemographicsPage = () => {
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const analytics = useAnalytics();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -21,16 +24,31 @@ const DemographicsPage = () => {
         setData(response.data);
         setMetadata(response.metadata);
         setError(null);
+        
+        // Track successful data load
+        analytics.trackEvent('PICKS_LOAD_SUCCESS', {
+          year: selectedYear,
+          has_data: response.data.length > 0,
+          total_picks: response.metadata?.total_picks,
+          total_deaths: response.metadata?.total_deaths
+        });
       } catch (err) {
         setError('Failed to load demographics data');
         console.error('Error fetching demographics data:', err);
+        
+        // Track error
+        analytics.trackEvent('ERROR_OCCURRED', {
+          error_type: 'api_error',
+          error_message: err instanceof Error ? err.message : 'Failed to load demographics data',
+          year: selectedYear
+        });
       } finally {
         setLoading(false);
       }
     };
 
     fetchData();
-  }, [selectedYear]);
+  }, [selectedYear, analytics]);
 
   // Show loading state only on initial load
   if (loading && !data.length) {

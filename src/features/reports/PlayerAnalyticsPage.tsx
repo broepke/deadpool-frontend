@@ -4,6 +4,7 @@ import { getPlayerAnalytics } from '../../api/services/reporting';
 import type { PlayerAnalyticsResponse } from '../../api/services/reporting';
 import { LoadingSpinner } from '../../components/common/LoadingSpinner';
 import { YearSelect } from '../../components/common/YearSelect';
+import { useAnalytics } from '../../services/analytics/provider';
 
 const PlayerAnalyticsPage = () => {
   const [data, setData] = useState<PlayerAnalyticsResponse['data']>([]);
@@ -14,6 +15,8 @@ const PlayerAnalyticsPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const analytics = useAnalytics();
+
   // Initial load to get all players
   useEffect(() => {
     const fetchAllPlayers = async () => {
@@ -23,13 +26,25 @@ const PlayerAnalyticsPage = () => {
           player_id: player.player_id,
           player_name: player.player_name
         })));
+        
+        analytics.trackEvent('PICKS_LOAD_SUCCESS', {
+          year: selectedYear,
+          has_data: response.data.length > 0,
+          total_players: response.data.length,
+          type: 'all_players'
+        });
       } catch (err) {
         console.error('Error fetching all players:', err);
+        analytics.trackEvent('ERROR_OCCURRED', {
+          error_type: 'api_error',
+          error_message: err instanceof Error ? err.message : 'Failed to load all players',
+          year: selectedYear
+        });
       }
     };
 
     fetchAllPlayers();
-  }, [selectedYear]);
+  }, [selectedYear, analytics]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -39,16 +54,32 @@ const PlayerAnalyticsPage = () => {
         setData(response.data);
         setMetadata(response.metadata);
         setError(null);
+
+        analytics.trackEvent('PICKS_LOAD_SUCCESS', {
+          year: selectedYear,
+          player_id: selectedPlayerId || 'all',
+          has_data: response.data.length > 0,
+          total_picks: response.metadata?.total_picks,
+          total_deaths: response.metadata?.total_deaths,
+          success_rate: response.metadata?.overall_success_rate
+        });
       } catch (err) {
         setError('Failed to load player analytics data');
         console.error('Error fetching player analytics data:', err);
+
+        analytics.trackEvent('ERROR_OCCURRED', {
+          error_type: 'api_error',
+          error_message: err instanceof Error ? err.message : 'Failed to load player analytics data',
+          year: selectedYear,
+          player_id: selectedPlayerId || 'all'
+        });
       } finally {
         setLoading(false);
       }
     };
 
     fetchData();
-  }, [selectedPlayerId, selectedYear]);
+  }, [selectedPlayerId, selectedYear, analytics]);
 
   // Show loading state only on initial load
   if (loading && !data.length) {
@@ -79,8 +110,16 @@ const PlayerAnalyticsPage = () => {
           <select
             value={selectedPlayerId}
             onChange={(e) => {
-              setSelectedPlayerId(e.target.value);
+              const newPlayerId = e.target.value;
+              setSelectedPlayerId(newPlayerId);
               setLoading(true);
+              
+              analytics.trackEvent('REPORT_FILTER_CHANGED', {
+                filter_type: 'player',
+                value: newPlayerId || 'all',
+                previous_value: selectedPlayerId || 'all',
+                year: selectedYear
+              });
             }}
             className="rounded-md border border-gray-300 px-3 py-1.5"
           >

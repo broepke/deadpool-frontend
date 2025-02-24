@@ -4,6 +4,7 @@ import { getTimeAnalytics } from '../../api/services/reporting';
 import type { TimeAnalyticsResponse } from '../../api/services/reporting';
 import { LoadingSpinner } from '../../components/common/LoadingSpinner';
 import { YearSelect } from '../../components/common/YearSelect';
+import { useAnalytics } from '../../services/analytics/provider';
 
 const TimeAnalyticsPage = () => {
   const [data, setData] = useState<TimeAnalyticsResponse['data']>([]);
@@ -13,6 +14,8 @@ const TimeAnalyticsPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const analytics = useAnalytics();
+
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
@@ -21,16 +24,32 @@ const TimeAnalyticsPage = () => {
         setData(response.data);
         setMetadata(response.metadata);
         setError(null);
+
+        analytics.trackEvent('PICKS_LOAD_SUCCESS', {
+          year: selectedYear,
+          period: period,
+          has_data: response.data.length > 0,
+          total_picks: response.metadata?.total_picks,
+          total_deaths: response.metadata?.total_deaths,
+          success_rate: response.metadata?.overall_success_rate
+        });
       } catch (err) {
         setError('Failed to load time analytics data');
         console.error('Error fetching time analytics data:', err);
+
+        analytics.trackEvent('ERROR_OCCURRED', {
+          error_type: 'api_error',
+          error_message: err instanceof Error ? err.message : 'Failed to load time analytics data',
+          year: selectedYear,
+          period: period
+        });
       } finally {
         setLoading(false);
       }
     };
 
     fetchData();
-  }, [period, selectedYear]);
+  }, [period, selectedYear, analytics]);
 
   if (loading) {
     return <LoadingSpinner />;
@@ -56,8 +75,16 @@ const TimeAnalyticsPage = () => {
           <select
             value={period}
             onChange={(e) => {
-              setPeriod(e.target.value as 'daily' | 'weekly' | 'monthly');
+              const newPeriod = e.target.value as 'daily' | 'weekly' | 'monthly';
+              setPeriod(newPeriod);
               setLoading(true);
+              
+              analytics.trackEvent('REPORT_FILTER_CHANGED', {
+                filter_type: 'period',
+                value: newPeriod,
+                previous_value: period,
+                year: selectedYear
+              });
             }}
             className="rounded-md border border-gray-300 px-3 py-1.5"
           >

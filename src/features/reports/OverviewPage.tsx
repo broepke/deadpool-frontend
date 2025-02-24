@@ -4,12 +4,15 @@ import { getOverview } from '../../api/services/reporting';
 import type { OverviewResponse } from '../../api/services/reporting';
 import { LoadingSpinner } from '../../components/common/LoadingSpinner';
 import { YearSelect } from '../../components/common/YearSelect';
+import { useAnalytics } from '../../services/analytics/provider';
 
 const OverviewPage = () => {
   const [data, setData] = useState<OverviewResponse['data'] | null>(null);
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const analytics = useAnalytics();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -19,16 +22,32 @@ const OverviewPage = () => {
         const response = await getOverview(selectedYear);
         setData(response.data);
         setError(null);
+
+        // Track successful data load
+        analytics.trackEvent('PICKS_LOAD_SUCCESS', {
+          year: selectedYear,
+          has_data: !!response.data,
+          total_picks: response.data?.total_picks,
+          total_players: response.data?.total_players,
+          success_rate: response.data?.pick_success_rate
+        });
       } catch (err) {
         setError('Failed to load overview data');
         console.error('Error fetching overview data:', err);
+
+        // Track error
+        analytics.trackEvent('ERROR_OCCURRED', {
+          error_type: 'api_error',
+          error_message: err instanceof Error ? err.message : 'Failed to load overview data',
+          year: selectedYear
+        });
       } finally {
         setLoading(false);
       }
     };
 
     fetchData();
-  }, [selectedYear]);
+  }, [selectedYear, analytics]);
 
   // Show loading state only on initial load
   if (loading && !data) {
