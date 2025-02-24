@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { getPlayerAnalytics } from '../../api/services/reporting';
 import type { PlayerAnalyticsResponse } from '../../api/services/reporting';
 import { LoadingSpinner } from '../../components/common/LoadingSpinner';
