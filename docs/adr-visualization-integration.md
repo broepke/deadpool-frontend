@@ -99,16 +99,16 @@ Example Request/Response:
 - Add `/api/analytics/aggregates` endpoint
   - Parameters: dimension, metric
   - Returns: Grouped data for pie/bar charts
-  - Use Cases: Distribution of picks, player selections
+  - Use Cases: Distribution analysis, trend patterns
 
 Example Request/Response:
 ```typescript
-// GET /api/analytics/aggregates?dimension=player_category&metric=pick_count
+// GET /api/analytics/aggregates?dimension=activity_type&metric=count
 {
-  "dimension": "player_category",
-  "metric": "pick_count",
+  "dimension": "activity_type",
+  "metric": "count",
   "filters": {
-    "timeframe": "current_season"
+    "timeframe": "current_month"
   }
 }
 
@@ -116,20 +116,20 @@ Example Request/Response:
 {
   "data": [
     {
-      "category": "Quarterbacks",
-      "pickCount": 450,
+      "type": "Reviews",
+      "count": 450,
       "percentage": 35.2
     },
     {
-      "category": "Running Backs",
-      "pickCount": 380,
+      "type": "Comments",
+      "count": 380,
       "percentage": 29.7
     },
-    // ... other categories
+    // ... other activity types
   ],
   "metadata": {
-    "totalPicks": 1280,
-    "timeframe": "2024-2025 Season"
+    "totalCount": 1280,
+    "timeframe": "February 2025"
   }
 }
 ```
@@ -144,69 +144,39 @@ Example Request/Response:
 ```typescript
 // GET /api/analytics/comparisons
 {
-  "entities": ["top_5_players"],
-  "metrics": ["draft_position", "actual_performance"],
-  "timeframe": "current_season"
+  "entities": ["top_5_users"],
+  "metrics": ["engagement_score", "contribution_count"],
+  "timeframe": "current_month"
 }
 
 // Response
 {
   "data": [
     {
-      "playerName": "Tom Brady",
-      "draftPosition": {
-        "value": 12,
+      "userName": "Alice Chen",
+      "engagementScore": {
+        "value": 92,
         "rank": 1
       },
-      "actualPerformance": {
-        "value": 285.4,
+      "contributionCount": {
+        "value": 285,
         "rank": 3
       }
     },
-    // ... more player comparisons
+    // ... more user comparisons
   ],
   "metadata": {
-    "season": "2024-2025",
+    "period": "February 2025",
     "lastUpdated": "2025-02-06T20:23:39Z",
     "metrics": {
-      "draftPosition": {
-        "unit": "position",
-        "description": "Average draft position"
-      },
-      "actualPerformance": {
+      "engagementScore": {
         "unit": "points",
-        "description": "Total fantasy points"
+        "description": "Overall user engagement score"
+      },
+      "contributionCount": {
+        "unit": "count",
+        "description": "Total number of contributions"
       }
-    }
-  }
-}
-```
-
-### 4. Real-time Draft Analytics Endpoint
-- Add `/api/analytics/draft-insights` endpoint
-  - Provides real-time analytics during draft sessions
-  - Supports WebSocket connections for live updates
-
-Example WebSocket Message:
-```typescript
-// WS: /api/analytics/draft-insights
-{
-  "type": "DRAFT_INSIGHT",
-  "timestamp": "2025-02-06T20:23:39Z",
-  "data": {
-    "roundNumber": 3,
-    "pickNumber": 27,
-    "trendingPositions": [
-      {
-        "position": "WR",
-        "pickPercentage": 42.3,
-        "trend": "increasing"
-      }
-    ],
-    "remainingByTier": {
-      "tier1": 5,
-      "tier2": 12,
-      "tier3": 28
     }
   }
 }
