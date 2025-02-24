@@ -74,11 +74,11 @@ export interface PhoneCodeVerificationResponse {
 
 // Person Types
 export interface PersonMetadata {
-  BirthDate: string;
+  BirthDate?: string;
   DeathDate?: string;
-  WikiID: string;
-  WikiPage: string;
-  Age: number;
+  WikiID?: string;
+  WikiPage?: string;
+  Age?: number;
 }
 
 export interface Person {
@@ -160,6 +160,49 @@ export interface LeaderboardEntry {
 export interface RouteInfo {
   path: string;
   name: string;
+}
+
+// Search Types
+export interface SearchParams {
+  q: string;
+  type?: 'people' | 'players';
+  mode?: 'fuzzy' | 'exact';
+  limit?: number;
+  offset?: number;
+}
+
+export interface SearchResultMetadata {
+  Age?: number;
+  BirthDate?: string;
+  DeathDate?: string;
+  WikiID?: string;
+  WikiPage?: string;
+  draft_order?: number;
+  phone_number?: string;
+  phone_verified?: boolean;
+  sms_notifications_enabled?: boolean;
+}
+
+export interface SearchResult {
+  id: string;
+  type: 'people' | 'players';
+  attributes: {
+    name: string;
+    status: 'alive' | 'deceased';
+    metadata: SearchResultMetadata;
+  };
+  score: number;
+}
+
+export interface SearchResponse {
+  message: string;
+  data: SearchResult[];
+  metadata: {
+    total: number;
+    limit: number;
+    offset: number;
+    query: string;
+  };
 }
 
 // Error Types

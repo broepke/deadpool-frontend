@@ -1,7 +1,10 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { peopleApi, picksApi } from '../../api';
-import { Person, PaginationMeta, PickDetail } from '../../api/types';
+import { Person, PaginationMeta, PickDetail, SearchParams, SearchResponse } from '../../api/types';
 import { LoadingSpinner } from '../../components/common/LoadingSpinner';
+import { SearchBar } from '../../components/common/SearchBar';
+import { SearchResults } from '../../components/common/SearchResults';
+import { searchService } from '../../api/services/search';
 import { useAnalytics } from '../../services/analytics/provider';
 
 type StatusFilter = 'all' | 'deceased' | 'alive';
@@ -25,6 +28,16 @@ export default function PeoplePage() {
   const [pageSize] = useState(10);
   const [paginationMeta, setPaginationMeta] = useState<PaginationMeta | null>(null);
   const [personPicks, setPersonPicks] = useState<PersonPicks>({});
+  
+  // Search-related state
+  const [searchParams, setSearchParams] = useState<SearchParams>({
+    q: '',
+    type: 'people',
+    mode: 'fuzzy',
+    limit: pageSize
+  });
+  const [searchResults, setSearchResults] = useState<SearchResponse | null>(null);
+  const [isSearching, setIsSearching] = useState(false);
 
   const handleFetchPicks = useCallback(async (personId: string) => {
     // If picks are already visible, hide them
@@ -100,55 +113,104 @@ export default function PeoplePage() {
     setSelectedStatus(status);
   }, [analytics, selectedStatus]);
 
+  const handleSearch = useCallback(async (params: SearchParams) => {
+    setSearchParams(params);
+    setCurrentPage(1);
+    setIsSearching(!!params.q);
+
+    if (!params.q) {
+      setSearchResults(null);
+      return;
+    }
+
+    analytics.trackEvent('PEOPLE_SEARCH_INITIATED', {
+      query: params.q,
+      mode: params.mode,
+      type: params.type
+    });
+  }, [analytics]);
+
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const params = {
-          page: currentPage,
-          page_size: pageSize,
-          ...(selectedStatus !== 'all' && { status: selectedStatus })
-        };
         
-        const paginatedResponse = await peopleApi.getAll(params);
-        setPeople(paginatedResponse.data);
+        if (isSearching) {
+          const searchResponse = await searchService.search({
+            ...searchParams,
+            offset: (currentPage - 1) * pageSize
+          });
+          
+          setSearchResults(searchResponse);
+          // Transform search results to match Person interface
+          setPeople(searchResponse.data.map(result => ({
+            id: result.id,
+            name: result.attributes.name,
+            status: result.attributes.status,
+            metadata: result.attributes.metadata
+          })));
+          
+          setPaginationMeta({
+            total: searchResponse.metadata.total,
+            page: Math.floor(searchResponse.metadata.offset / searchResponse.metadata.limit) + 1,
+            page_size: searchResponse.metadata.limit,
+            total_pages: Math.ceil(searchResponse.metadata.total / searchResponse.metadata.limit)
+          });
 
-        // Set pagination metadata
-        setPaginationMeta({
-          total: paginatedResponse.total,
-          page: paginatedResponse.page,
-          page_size: paginatedResponse.page_size,
-          total_pages: paginatedResponse.total_pages
-        });
+          analytics.trackEvent('PEOPLE_SEARCH_SUCCESS', {
+            query: searchParams.q,
+            mode: searchParams.mode,
+            total_results: searchResponse.metadata.total,
+            page: currentPage,
+            has_results: searchResponse.data.length > 0
+          });
+        } else {
+          const params = {
+            page: currentPage,
+            page_size: pageSize,
+            ...(selectedStatus !== 'all' && { status: selectedStatus })
+          };
+          
+          const paginatedResponse = await peopleApi.getAll(params);
+          setPeople(paginatedResponse.data);
+          setPaginationMeta({
+            total: paginatedResponse.total,
+            page: paginatedResponse.page,
+            page_size: paginatedResponse.page_size,
+            total_pages: paginatedResponse.total_pages
+          });
+
+          // Calculate statistics for analytics
+          const currentPagePeople = paginatedResponse.data.length;
+          const deceasedCount = paginatedResponse.data.filter((person: Person) => person.status === 'deceased').length;
+          const aliveCount = currentPagePeople - deceasedCount;
+
+          analytics.trackEvent('PEOPLE_LOAD_SUCCESS', {
+            total_people: paginatedResponse.total,
+            current_page_people: currentPagePeople,
+            deceased_count: deceasedCount,
+            alive_count: aliveCount,
+            has_data: currentPagePeople > 0,
+            page: currentPage,
+            page_size: pageSize,
+            status_filter: selectedStatus
+          });
+        }
         
         setError(null);
-
-        // Calculate statistics for analytics
-        const currentPagePeople = paginatedResponse.data.length;
-        const deceasedCount = paginatedResponse.data.filter((person: Person) => person.status === 'deceased').length;
-        const aliveCount = currentPagePeople - deceasedCount;
-
-        // Track successful people load with statistics
-        analytics.trackEvent('PEOPLE_LOAD_SUCCESS', {
-          total_people: paginatedResponse.total,
-          current_page_people: currentPagePeople,
-          deceased_count: deceasedCount,
-          alive_count: aliveCount,
-          has_data: currentPagePeople > 0,
-          page: currentPage,
-          page_size: pageSize,
-          status_filter: selectedStatus
-        });
       } catch (err) {
         console.error('Failed to fetch people:', err);
-        const errorMessage = 'Failed to load people. Please try again later.';
+        const errorMessage = isSearching
+          ? 'Failed to search people. Please try again.'
+          : 'Failed to load people. Please try again later.';
         setError(errorMessage);
 
-        analytics.trackEvent('PEOPLE_LOAD_ERROR', {
+        analytics.trackEvent(isSearching ? 'PEOPLE_SEARCH_ERROR' : 'PEOPLE_LOAD_ERROR', {
           error_type: 'api_error',
           error_message: errorMessage,
-          endpoint: 'getAll',
-          component: 'PeoplePage'
+          endpoint: isSearching ? 'search' : 'getAll',
+          component: 'PeoplePage',
+          ...(isSearching && { query: searchParams.q })
         });
       } finally {
         setLoading(false);
@@ -156,7 +218,15 @@ export default function PeoplePage() {
     };
 
     fetchData();
-  }, [selectedStatus, currentPage, pageSize, analytics]);
+  }, [
+    selectedStatus,
+    currentPage,
+    pageSize,
+    analytics,
+    isSearching,
+    searchParams,
+    searchService
+  ]);
 
   const handlePageChange = useCallback((newPage: number) => {
     analytics.trackEvent('PEOPLE_FILTER_CHANGED', {
@@ -178,7 +248,8 @@ export default function PeoplePage() {
   };
 
   return (
-    <div>
+    <div className="space-y-4">
+      {/* Header and Search Section */}
       <div className="sm:flex sm:items-center">
         <div className="sm:flex-auto">
           <h1 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">People</h1>
@@ -187,10 +258,16 @@ export default function PeoplePage() {
           </p>
         </div>
         <div className="mt-4 sm:ml-16 sm:mt-0 sm:flex-none flex gap-4">
+          <SearchBar
+            onSearch={handleSearch}
+            isLoading={loading}
+            className="w-96"
+          />
           <select
             value={selectedStatus}
             onChange={(e) => handleStatusChange(e.target.value as StatusFilter)}
-            className="block w-full rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800 ring-1 ring-inset ring-gray-300 dark:ring-gray-700 focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6"
+            disabled={isSearching}
+            className="block w-full rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800 ring-1 ring-inset ring-gray-300 dark:ring-gray-700 focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <option value="all">All Statuses</option>
             <option value="alive">Alive</option>
@@ -198,14 +275,37 @@ export default function PeoplePage() {
           </select>
         </div>
       </div>
-      
-      {loading ? (
+
+      {/* Search Results */}
+      {isSearching && searchResults && (
+        <SearchResults
+          results={searchResults.data}
+          isLoading={loading}
+          error={error || undefined}
+          metadata={searchResults.metadata}
+          onPageChange={(offset) => {
+            setSearchParams(prev => ({ ...prev, offset }));
+            setCurrentPage(Math.floor(offset / pageSize) + 1);
+          }}
+          onFetchPicks={handleFetchPicks}
+          personPicks={personPicks}
+        />
+      )}
+
+      {/* Regular Table View */}
+      {!isSearching && loading && (
         <div className="flex justify-center items-center min-h-[200px]">
           <LoadingSpinner size="lg" />
         </div>
-      ) : error ? (
-        <div className="mt-8 text-center text-red-600 dark:text-red-400">{error}</div>
-      ) : (
+      )}
+      
+      {!isSearching && error && (
+        <div className="mt-8 text-center text-red-600 dark:text-red-400">
+          {error}
+        </div>
+      )}
+      
+      {!isSearching && !loading && !error && (
         <div className="mt-8 flow-root">
           <div className="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
             <div className="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">

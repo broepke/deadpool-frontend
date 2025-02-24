@@ -26,6 +26,9 @@ export type AnalyticsEventName =
   | 'PEOPLE_LOAD_ERROR'
   | 'PERSON_PICKS_LOAD_SUCCESS'
   | 'PERSON_PICKS_LOAD_ERROR'
+  | 'PEOPLE_SEARCH_INITIATED'
+  | 'PEOPLE_SEARCH_SUCCESS'
+  | 'PEOPLE_SEARCH_ERROR'
   | 'FORM_SUBMIT'
   | 'FORM_ERROR'
   | 'ERROR_OCCURRED'
@@ -78,6 +81,9 @@ export const ANALYTICS_EVENTS: Record<AnalyticsEventName, string> = {
   PEOPLE_LOAD_ERROR: 'people_load_error',
   PERSON_PICKS_LOAD_SUCCESS: 'person_picks_load_success',
   PERSON_PICKS_LOAD_ERROR: 'person_picks_load_error',
+  PEOPLE_SEARCH_INITIATED: 'people_search_initiated',
+  PEOPLE_SEARCH_SUCCESS: 'people_search_success',
+  PEOPLE_SEARCH_ERROR: 'people_search_error',
 
   // Form Events
   FORM_SUBMIT: 'form_submit',
@@ -153,4 +159,10 @@ export interface PeopleEventProperties extends CommonEventProperties {
   page_size?: number;
   previous_page?: number;
   new_page?: number;
+  // Search-related properties
+  query?: string;
+  mode?: 'fuzzy' | 'exact';
+  total_results?: number;
+  has_results?: boolean;
+  search_type?: 'people' | 'players';
 }
