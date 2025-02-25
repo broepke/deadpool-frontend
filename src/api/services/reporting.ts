@@ -68,7 +68,6 @@ export interface PlayerAnalyticsResponse {
     player_id: string;
     player_name: string;
     preferred_age_ranges: string[];
-    preferred_categories: string[];
     pick_timing_pattern: string;
     success_rate: number;
     score_progression: number[];

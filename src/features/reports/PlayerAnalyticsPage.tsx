@@ -189,21 +189,6 @@ const PlayerAnalyticsPage = () => {
             </div>
           </div>
 
-          {/* Preferred Categories */}
-          <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow mb-8">
-            <h3 className="text-lg font-semibold mb-4 dark:text-gray-100">Preferred Categories</h3>
-            <div className="flex flex-wrap gap-2">
-              {player.preferred_categories.map((category) => (
-                <span
-                  key={category}
-                  className="px-3 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 rounded-full text-sm"
-                >
-                  {category}
-                </span>
-              ))}
-            </div>
-          </div>
-
           {/* Score Progression Chart */}
           <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow">
             <h3 className="text-lg font-semibold mb-4 dark:text-gray-100">Score Progression</h3>
