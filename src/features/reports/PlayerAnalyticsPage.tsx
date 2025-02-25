@@ -192,17 +192,26 @@ const PlayerAnalyticsPage = () => {
           {/* Score Progression Chart */}
           <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow">
             <h3 className="text-lg font-semibold mb-4 dark:text-gray-100">Score Progression</h3>
-            <div className="h-80">
+            <div className="h-80 mb-6">
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={player.score_progression.map((score, index) => ({
-                  period: index + 1,
-                  score
-                }))}>
+                <LineChart
+                  data={player.score_progression.map((score, index) => ({
+                    period: index + 1,
+                    score
+                  }))}
+                  margin={{ bottom: 30 }}
+                >
                   <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="period" />
+                  <XAxis
+                    dataKey="period"
+                    label={{ value: 'Pick Number', position: 'bottom', offset: 0 }}
+                  />
                   <YAxis />
-                  <Tooltip />
-                  <Legend />
+                  <Tooltip
+                    formatter={(value, name) => [value, 'Score']}
+                    labelFormatter={(label) => `Pick #${label}`}
+                  />
+                  <Legend verticalAlign="top" height={36} />
                   <Line
                     type="monotone"
                     dataKey="score"
