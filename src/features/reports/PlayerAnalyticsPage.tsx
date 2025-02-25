@@ -208,7 +208,7 @@ const PlayerAnalyticsPage = () => {
                   />
                   <YAxis />
                   <Tooltip
-                    formatter={(value, name) => [value, 'Score']}
+                    formatter={(value, _name) => [value, 'Score']}
                     labelFormatter={(label) => `Pick #${label}`}
                   />
                   <Legend verticalAlign="top" height={36} />
