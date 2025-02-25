@@ -86,7 +86,7 @@ const TimeAnalyticsPage = () => {
                 year: selectedYear
               });
             }}
-            className="rounded-md border border-gray-300 px-3 py-1.5"
+            className="rounded-md border border-gray-300 dark:border-gray-700 px-3 py-1.5 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
           >
             <option value="daily">Daily</option>
             <option value="weekly">Weekly</option>
@@ -98,28 +98,28 @@ const TimeAnalyticsPage = () => {
       {/* Summary Cards */}
       {metadata && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-          <div className="bg-white p-4 rounded-lg shadow">
-            <h3 className="text-gray-600 text-sm">Total Picks</h3>
-            <p className="text-2xl font-bold">{metadata.total_picks}</p>
+          <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow">
+            <h3 className="text-gray-600 dark:text-gray-400 text-sm">Total Picks</h3>
+            <p className="text-2xl font-bold dark:text-gray-100">{metadata.total_picks}</p>
           </div>
-          <div className="bg-white p-4 rounded-lg shadow">
-            <h3 className="text-gray-600 text-sm">Total Deaths</h3>
-            <p className="text-2xl font-bold">{metadata.total_deaths}</p>
+          <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow">
+            <h3 className="text-gray-600 dark:text-gray-400 text-sm">Total Deaths</h3>
+            <p className="text-2xl font-bold dark:text-gray-100">{metadata.total_deaths}</p>
           </div>
-          <div className="bg-white p-4 rounded-lg shadow">
-            <h3 className="text-gray-600 text-sm">Overall Success Rate</h3>
-            <p className="text-2xl font-bold">{(metadata.overall_success_rate * 100).toFixed(1)}%</p>
+          <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow">
+            <h3 className="text-gray-600 dark:text-gray-400 text-sm">Overall Success Rate</h3>
+            <p className="text-2xl font-bold dark:text-gray-100">{(metadata.overall_success_rate * 100).toFixed(1)}%</p>
           </div>
-          <div className="bg-white p-4 rounded-lg shadow">
-            <h3 className="text-gray-600 text-sm">Avg Picks per Period</h3>
-            <p className="text-2xl font-bold">{metadata.average_picks_per_period.toFixed(1)}</p>
+          <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow">
+            <h3 className="text-gray-600 dark:text-gray-400 text-sm">Avg Picks per Period</h3>
+            <p className="text-2xl font-bold dark:text-gray-100">{metadata.average_picks_per_period.toFixed(1)}</p>
           </div>
         </div>
       )}
 
       {/* Trends Chart */}
-      <div className="bg-white p-4 rounded-lg shadow mb-8">
-        <h2 className="text-xl font-semibold mb-4">Pick and Death Trends</h2>
+      <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow mb-8">
+        <h2 className="text-xl font-semibold mb-4 dark:text-gray-100">Pick and Death Trends</h2>
         <div className="h-80">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={data}>
@@ -166,8 +166,8 @@ const TimeAnalyticsPage = () => {
       </div>
 
       {/* Average Age Trend */}
-      <div className="bg-white p-4 rounded-lg shadow">
-        <h2 className="text-xl font-semibold mb-4">Average Age Trend</h2>
+      <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow">
+        <h2 className="text-xl font-semibold mb-4 dark:text-gray-100">Average Age Trend</h2>
         <div className="h-80">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={data}>

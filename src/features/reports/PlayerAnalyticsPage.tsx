@@ -121,7 +121,7 @@ const PlayerAnalyticsPage = () => {
                 year: selectedYear
               });
             }}
-            className="rounded-md border border-gray-300 px-3 py-1.5"
+            className="rounded-md border border-gray-300 dark:border-gray-700 px-3 py-1.5 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
           >
             <option value="">All Players</option>
             {allPlayers.map((player) => (
@@ -136,21 +136,21 @@ const PlayerAnalyticsPage = () => {
       {/* Summary Cards */}
       {metadata && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-          <div className="bg-white p-4 rounded-lg shadow">
-            <h3 className="text-gray-600 text-sm">Total Players</h3>
-            <p className="text-2xl font-bold">{metadata.total_players}</p>
+          <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow">
+            <h3 className="text-gray-600 dark:text-gray-400 text-sm">Total Players</h3>
+            <p className="text-2xl font-bold dark:text-gray-100">{metadata.total_players}</p>
           </div>
-          <div className="bg-white p-4 rounded-lg shadow">
-            <h3 className="text-gray-600 text-sm">Total Picks</h3>
-            <p className="text-2xl font-bold">{metadata.total_picks}</p>
+          <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow">
+            <h3 className="text-gray-600 dark:text-gray-400 text-sm">Total Picks</h3>
+            <p className="text-2xl font-bold dark:text-gray-100">{metadata.total_picks}</p>
           </div>
-          <div className="bg-white p-4 rounded-lg shadow">
-            <h3 className="text-gray-600 text-sm">Total Deaths</h3>
-            <p className="text-2xl font-bold">{metadata.total_deaths}</p>
+          <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow">
+            <h3 className="text-gray-600 dark:text-gray-400 text-sm">Total Deaths</h3>
+            <p className="text-2xl font-bold dark:text-gray-100">{metadata.total_deaths}</p>
           </div>
-          <div className="bg-white p-4 rounded-lg shadow">
-            <h3 className="text-gray-600 text-sm">Overall Success Rate</h3>
-            <p className="text-2xl font-bold">{(metadata.overall_success_rate * 100).toFixed(1)}%</p>
+          <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow">
+            <h3 className="text-gray-600 dark:text-gray-400 text-sm">Overall Success Rate</h3>
+            <p className="text-2xl font-bold dark:text-gray-100">{(metadata.overall_success_rate * 100).toFixed(1)}%</p>
           </div>
         </div>
       )}
@@ -159,29 +159,29 @@ const PlayerAnalyticsPage = () => {
       {data.map((player) => (
         <div key={player.player_id} className="mb-8">
           {data.length > 1 && (
-            <h2 className="text-xl font-semibold mb-4">{player.player_name}</h2>
+            <h2 className="text-xl font-semibold mb-4 dark:text-gray-100">{player.player_name}</h2>
           )}
 
           {/* Success Rate and Preferences */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-            <div className="bg-white p-4 rounded-lg shadow">
-              <h3 className="text-gray-600 text-sm mb-2">Success Rate</h3>
-              <p className="text-2xl font-bold">{(player.success_rate * 100).toFixed(1)}%</p>
+            <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow">
+              <h3 className="text-gray-600 dark:text-gray-400 text-sm mb-2">Success Rate</h3>
+              <p className="text-2xl font-bold dark:text-gray-100">{(player.success_rate * 100).toFixed(1)}%</p>
             </div>
-            <div className="bg-white p-4 rounded-lg shadow">
-              <h3 className="text-gray-600 text-sm mb-2">Pick Timing Pattern</h3>
-              <p className="text-lg">{player.pick_timing_pattern}</p>
+            <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow">
+              <h3 className="text-gray-600 dark:text-gray-400 text-sm mb-2">Pick Timing Pattern</h3>
+              <p className="text-lg dark:text-gray-100">{player.pick_timing_pattern}</p>
             </div>
           </div>
 
           {/* Preferred Age Ranges */}
-          <div className="bg-white p-4 rounded-lg shadow mb-8">
-            <h3 className="text-lg font-semibold mb-4">Preferred Age Ranges</h3>
+          <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow mb-8">
+            <h3 className="text-lg font-semibold mb-4 dark:text-gray-100">Preferred Age Ranges</h3>
             <div className="flex flex-wrap gap-2">
               {player.preferred_age_ranges.map((range) => (
                 <span
                   key={range}
-                  className="px-3 py-1 bg-indigo-100 text-indigo-800 rounded-full text-sm"
+                  className="px-3 py-1 bg-indigo-100 dark:bg-indigo-900 text-indigo-800 dark:text-indigo-200 rounded-full text-sm"
                 >
                   {range}
                 </span>
@@ -190,13 +190,13 @@ const PlayerAnalyticsPage = () => {
           </div>
 
           {/* Preferred Categories */}
-          <div className="bg-white p-4 rounded-lg shadow mb-8">
-            <h3 className="text-lg font-semibold mb-4">Preferred Categories</h3>
+          <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow mb-8">
+            <h3 className="text-lg font-semibold mb-4 dark:text-gray-100">Preferred Categories</h3>
             <div className="flex flex-wrap gap-2">
               {player.preferred_categories.map((category) => (
                 <span
                   key={category}
-                  className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm"
+                  className="px-3 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 rounded-full text-sm"
                 >
                   {category}
                 </span>
@@ -205,8 +205,8 @@ const PlayerAnalyticsPage = () => {
           </div>
 
           {/* Score Progression Chart */}
-          <div className="bg-white p-4 rounded-lg shadow">
-            <h3 className="text-lg font-semibold mb-4">Score Progression</h3>
+          <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow">
+            <h3 className="text-lg font-semibold mb-4 dark:text-gray-100">Score Progression</h3>
             <div className="h-80">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={player.score_progression.map((score, index) => ({
@@ -234,7 +234,7 @@ const PlayerAnalyticsPage = () => {
 
       {/* Last Updated */}
       {metadata && (
-        <div className="mt-8 text-sm text-gray-500">
+        <div className="mt-8 text-sm text-gray-500 dark:text-gray-400">
           Last updated: {new Date(metadata.updated_at).toLocaleString()}
         </div>
       )}

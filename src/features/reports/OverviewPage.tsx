@@ -85,27 +85,27 @@ const OverviewPage = () => {
       
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        <div className="bg-white p-4 rounded-lg shadow">
-          <h3 className="text-gray-600 text-sm">Total Players</h3>
-          <p className="text-2xl font-bold">{data.total_players}</p>
+        <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow">
+          <h3 className="text-gray-600 dark:text-gray-400 text-sm">Total Players</h3>
+          <p className="text-2xl font-bold dark:text-gray-100">{data.total_players}</p>
         </div>
-        <div className="bg-white p-4 rounded-lg shadow">
-          <h3 className="text-gray-600 text-sm">Total Picks</h3>
-          <p className="text-2xl font-bold">{data.total_picks}</p>
+        <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow">
+          <h3 className="text-gray-600 dark:text-gray-400 text-sm">Total Picks</h3>
+          <p className="text-2xl font-bold dark:text-gray-100">{data.total_picks}</p>
         </div>
-        <div className="bg-white p-4 rounded-lg shadow">
-          <h3 className="text-gray-600 text-sm">Success Rate</h3>
-          <p className="text-2xl font-bold">{(data.pick_success_rate * 100).toFixed(1)}%</p>
+        <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow">
+          <h3 className="text-gray-600 dark:text-gray-400 text-sm">Success Rate</h3>
+          <p className="text-2xl font-bold dark:text-gray-100">{(data.pick_success_rate * 100).toFixed(1)}%</p>
         </div>
-        <div className="bg-white p-4 rounded-lg shadow">
-          <h3 className="text-gray-600 text-sm">Average Pick Age</h3>
-          <p className="text-2xl font-bold">{data.average_pick_age.toFixed(1)}</p>
+        <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow">
+          <h3 className="text-gray-600 dark:text-gray-400 text-sm">Average Pick Age</h3>
+          <p className="text-2xl font-bold dark:text-gray-100">{data.average_pick_age.toFixed(1)}</p>
         </div>
       </div>
 
       {/* Age Distribution Chart */}
-      <div className="bg-white p-4 rounded-lg shadow mb-8">
-        <h2 className="text-xl font-semibold mb-4">Age Distribution</h2>
+      <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow mb-8">
+        <h2 className="text-xl font-semibold mb-4 dark:text-gray-100">Age Distribution</h2>
         <div className="h-80">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={ageDistributionData}>
@@ -123,18 +123,18 @@ const OverviewPage = () => {
 
       {/* Additional Statistics */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="bg-white p-4 rounded-lg shadow">
-          <h3 className="text-gray-600 text-sm mb-2">Most Popular Age Range</h3>
-          <p className="text-lg font-semibold">{data.most_popular_age_range}</p>
+        <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow">
+          <h3 className="text-gray-600 dark:text-gray-400 text-sm mb-2">Most Popular Age Range</h3>
+          <p className="text-lg font-semibold dark:text-gray-100">{data.most_popular_age_range}</p>
         </div>
-        <div className="bg-white p-4 rounded-lg shadow">
-          <h3 className="text-gray-600 text-sm mb-2">Most Successful Age Range</h3>
-          <p className="text-lg font-semibold">{data.most_successful_age_range}</p>
+        <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow">
+          <h3 className="text-gray-600 dark:text-gray-400 text-sm mb-2">Most Successful Age Range</h3>
+          <p className="text-lg font-semibold dark:text-gray-100">{data.most_successful_age_range}</p>
         </div>
       </div>
 
       {/* Last Updated */}
-      <div className="mt-8 text-sm text-gray-500">
+      <div className="mt-8 text-sm text-gray-500 dark:text-gray-400">
         Last updated: {new Date(data.updated_at).toLocaleString()}
       </div>
     </div>

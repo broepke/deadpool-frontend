@@ -80,28 +80,28 @@ const DemographicsPage = () => {
       {/* Summary Cards */}
       {metadata && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-          <div className="bg-white p-4 rounded-lg shadow">
-            <h3 className="text-gray-600 text-sm">Total Picks</h3>
-            <p className="text-2xl font-bold">{metadata.total_picks}</p>
+          <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow">
+            <h3 className="text-gray-600 dark:text-gray-400 text-sm">Total Picks</h3>
+            <p className="text-2xl font-bold dark:text-gray-100">{metadata.total_picks}</p>
           </div>
-          <div className="bg-white p-4 rounded-lg shadow">
-            <h3 className="text-gray-600 text-sm">Total Deaths</h3>
-            <p className="text-2xl font-bold">{metadata.total_deaths}</p>
+          <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow">
+            <h3 className="text-gray-600 dark:text-gray-400 text-sm">Total Deaths</h3>
+            <p className="text-2xl font-bold dark:text-gray-100">{metadata.total_deaths}</p>
           </div>
-          <div className="bg-white p-4 rounded-lg shadow">
-            <h3 className="text-gray-600 text-sm">Most Popular Range</h3>
-            <p className="text-2xl font-bold">{metadata.most_popular_range}</p>
+          <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow">
+            <h3 className="text-gray-600 dark:text-gray-400 text-sm">Most Popular Range</h3>
+            <p className="text-2xl font-bold dark:text-gray-100">{metadata.most_popular_range}</p>
           </div>
-          <div className="bg-white p-4 rounded-lg shadow">
-            <h3 className="text-gray-600 text-sm">Most Successful Range</h3>
-            <p className="text-2xl font-bold">{metadata.most_successful_range}</p>
+          <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow">
+            <h3 className="text-gray-600 dark:text-gray-400 text-sm">Most Successful Range</h3>
+            <p className="text-2xl font-bold dark:text-gray-100">{metadata.most_successful_range}</p>
           </div>
         </div>
       )}
 
       {/* Pick Distribution Chart */}
-      <div className="bg-white p-4 rounded-lg shadow mb-8">
-        <h2 className="text-xl font-semibold mb-4">Pick Distribution by Age Range</h2>
+      <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow mb-8">
+        <h2 className="text-xl font-semibold mb-4 dark:text-gray-100">Pick Distribution by Age Range</h2>
         <div className="h-80">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={data}>
@@ -126,8 +126,8 @@ const DemographicsPage = () => {
       </div>
 
       {/* Success Rate Chart */}
-      <div className="bg-white p-4 rounded-lg shadow mb-8">
-        <h2 className="text-xl font-semibold mb-4">Success Rate by Age Range</h2>
+      <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow mb-8">
+        <h2 className="text-xl font-semibold mb-4 dark:text-gray-100">Success Rate by Age Range</h2>
         <div className="h-80">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={data}>
@@ -151,8 +151,8 @@ const DemographicsPage = () => {
       </div>
 
       {/* Average Score Chart */}
-      <div className="bg-white p-4 rounded-lg shadow">
-        <h2 className="text-xl font-semibold mb-4">Average Score by Age Range</h2>
+      <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow">
+        <h2 className="text-xl font-semibold mb-4 dark:text-gray-100">Average Score by Age Range</h2>
         <div className="h-80">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={data}>
@@ -173,7 +173,7 @@ const DemographicsPage = () => {
 
       {/* Last Updated */}
       {metadata && (
-        <div className="mt-8 text-sm text-gray-500">
+        <div className="mt-8 text-sm text-gray-500 dark:text-gray-400">
           Last updated: {new Date(metadata.updated_at).toLocaleString()}
         </div>
       )}
