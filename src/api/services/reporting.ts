@@ -70,7 +70,11 @@ export interface PlayerAnalyticsResponse {
     preferred_age_ranges: string[];
     pick_timing_pattern: string;
     success_rate: number;
-    score_progression: number[];
+    score_progression: Array<{
+      score: number;
+      date: string | null;
+      person_name?: string;
+    }>;
   }>;
   metadata: {
     year: number;

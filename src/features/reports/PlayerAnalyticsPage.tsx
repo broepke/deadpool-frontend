@@ -195,21 +195,48 @@ const PlayerAnalyticsPage = () => {
             <div className="h-80 mb-6">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart
-                  data={player.score_progression.map((score, index) => ({
-                    period: index + 1,
-                    score
-                  }))}
-                  margin={{ bottom: 30 }}
+                  data={player.score_progression
+                    .filter(item => item.date !== null)
+                    .map(item => ({
+                      date: item.date,
+                      score: item.score,
+                      personName: item.person_name
+                    }))}
+                  margin={{ bottom: 30, right: 10, left: 10 }}
                 >
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis
-                    dataKey="period"
-                    label={{ value: 'Pick Number', position: 'bottom', offset: 0 }}
+                    dataKey="date"
+                    type="category"
+                    label={{ value: 'Date', position: 'bottom', offset: 0 }}
+                    domain={[`${selectedYear}-01-01`, `${selectedYear}-12-31`]}
+                    tickFormatter={(date) => {
+                      if (!date) return '';
+                      return new Date(date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+                    }}
                   />
-                  <YAxis />
+                  <YAxis
+                    label={{ value: 'Score', angle: -90, position: 'insideLeft' }}
+                  />
                   <Tooltip
-                    formatter={(value, _name) => [value, 'Score']}
-                    labelFormatter={(label) => `Pick #${label}`}
+                    formatter={(value, name) => [value, name === 'score' ? 'Score' : name]}
+                    labelFormatter={(date) => {
+                      if (!date) return 'No date';
+                      return new Date(date).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
+                    }}
+                    content={({ active, payload }) => {
+                      if (active && payload && payload.length) {
+                        const data = payload[0].payload;
+                        return (
+                          <div className="bg-white dark:bg-gray-800 p-2 border border-gray-200 dark:border-gray-700 rounded shadow">
+                            <p className="font-semibold">{data.date ? new Date(data.date).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' }) : 'No date'}</p>
+                            <p className="text-indigo-600 dark:text-indigo-400">Score: {data.score}</p>
+                            {data.personName && <p className="text-gray-600 dark:text-gray-400">Person: {data.personName}</p>}
+                          </div>
+                        );
+                      }
+                      return null;
+                    }}
                   />
                   <Legend verticalAlign="top" height={36} />
                   <Line
@@ -218,6 +245,7 @@ const PlayerAnalyticsPage = () => {
                     stroke="#4F46E5"
                     name="Score"
                     strokeWidth={2}
+                    activeDot={{ r: 8 }}
                   />
                 </LineChart>
               </ResponsiveContainer>
