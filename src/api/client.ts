@@ -150,42 +150,60 @@ class ApiClient {
 
   // Generic GET request
   async get<T>(url: string, params?: object): Promise<T> {
-    // Log the raw params for debugging
-    console.log('Raw params:', params);
-    
-    // Add a timestamp to prevent caching
-    const paramsWithTimestamp = {
-      ...params,
-      _t: Date.now()
-    };
-    
-    // Create axios config with params
-    const config = {
-      params: paramsWithTimestamp,
-      paramsSerializer: (params: Record<string, any>) => {
-        const searchParams = new URLSearchParams();
-        Object.entries(params).forEach(([key, value]) => {
-          if (value !== undefined && value !== null) {
-            searchParams.append(key, value.toString());
-          }
-        });
-        const queryString = searchParams.toString();
-        console.log('Serialized params:', queryString);
-        return queryString;
+    try {
+      // Log the raw params for debugging
+      console.log('Raw params:', params);
+      
+      // Ensure page parameter is a number if present
+      const processedParams = { ...params };
+      if (processedParams && 'page' in processedParams && processedParams.page !== undefined) {
+        processedParams.page = Number(processedParams.page);
+        console.log('Processed page parameter:', processedParams.page);
       }
-    };
-    
-    // Log the full request URL for debugging
-    const fullUrl = `${this.client.defaults.baseURL}${url}?${config.paramsSerializer(paramsWithTimestamp as Record<string, any>)}`;
-    console.log('Full request URL:', fullUrl);
-    
-    const response = await this.client.get<T>(url, config);
-    // Safely log the page value if it exists
-    console.log('Response data:', response.data);
-    if (response.data && typeof response.data === 'object' && 'page' in response.data) {
-      console.log('Response page value:', (response.data as any).page);
+      
+      // Add a timestamp to prevent caching
+      const paramsWithTimestamp = {
+        ...processedParams,
+        _t: Date.now()
+      };
+      
+      // Build query string manually for logging
+      const queryParams = new URLSearchParams();
+      Object.entries(paramsWithTimestamp || {}).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          queryParams.append(key, value.toString());
+        }
+      });
+      const queryString = queryParams.toString();
+      
+      // Log the full request URL for debugging
+      const fullUrl = `${this.client.defaults.baseURL}${url}?${queryString}`;
+      console.log('Full request URL:', fullUrl);
+      
+      // Make the request with the processed parameters
+      const response = await this.client.get<T>(url, {
+        params: paramsWithTimestamp
+      });
+      
+      // Safely log the page value if it exists
+      console.log('Response data:', response.data);
+      if (response.data && typeof response.data === 'object' && 'page' in response.data) {
+        const pageValue = (response.data as any).page;
+        console.log('Response page value:', pageValue);
+        
+        // Check if the page value in the response matches what we requested
+        if (processedParams && 'page' in processedParams &&
+            processedParams.page !== undefined &&
+            pageValue !== processedParams.page) {
+          console.warn(`Page mismatch in API response: requested ${processedParams.page}, received ${pageValue}`);
+        }
+      }
+      
+      return response.data;
+    } catch (error) {
+      console.error('Error in API get request:', error);
+      throw error;
     }
-    return response.data;
   }
 
   // Generic POST request

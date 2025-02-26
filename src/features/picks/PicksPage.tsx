@@ -5,6 +5,7 @@ import { LoadingSpinner } from '../../components/common/LoadingSpinner';
 import { useAnalytics } from '../../services/analytics/provider';
 
 const AVAILABLE_YEARS = [2025, 2024, 2023];
+const PAGE_SIZE = 10;
 
 export default function PicksPage() {
   const analytics = useAnalytics();
@@ -16,7 +17,6 @@ export default function PicksPage() {
   const [error, setError] = useState<string | null>(null);
   const [playersLoading, setPlayersLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize] = useState(10);
   const [paginationMeta, setPaginationMeta] = useState<PaginationMeta | null>(null);
 
   const handleYearChange = useCallback((year: number) => {
@@ -75,26 +75,43 @@ export default function PicksPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        console.log(`Fetching picks data for page ${currentPage}, year ${selectedYear}, player ${selectedPlayer || 'all'}`);
         setPicksLoading(true);
-        let picksData: PickDetail[];
+        
         const params = {
           year: selectedYear,
           page: currentPage,
-          page_size: pageSize
+          page_size: PAGE_SIZE
         };
+        
+        console.log('Request params:', params);
         
         const response = selectedPlayer
           ? await picksApi.getPlayerPicks(selectedPlayer, params)
           : await picksApi.getAll(params);
         
-        picksData = response.data;
-        setPicks(picksData);
-
+        setPicks(response.data);
+        
         // Set pagination metadata if available
         if (response.total !== undefined &&
             response.page !== undefined &&
             response.page_size !== undefined &&
             response.total_pages !== undefined) {
+          
+          console.log('Pagination metadata received:', {
+            total: response.total,
+            page: response.page,
+            page_size: response.page_size,
+            total_pages: response.total_pages
+          });
+          
+          // Verify the returned page matches the requested page
+          if (response.page !== currentPage) {
+            console.warn(`Page mismatch: requested page ${currentPage} but received page ${response.page}`);
+            // Update currentPage to match what the API returned to keep UI in sync
+            setCurrentPage(response.page);
+          }
+          
           setPaginationMeta({
             total: response.total,
             page: response.page,
@@ -102,16 +119,17 @@ export default function PicksPage() {
             total_pages: response.total_pages
           });
         } else {
+          console.warn('No pagination metadata received in response');
           setPaginationMeta(null);
         }
         setError(null);
 
         // Calculate statistics for the current page
-        const currentPagePicks = picksData.length;
-        const deceasedPicks = picksData.filter((pick: PickDetail) => pick.pick_person_death_date).length;
+        const currentPagePicks = response.data.length;
+        const deceasedPicks = response.data.filter((pick: PickDetail) => pick.pick_person_death_date).length;
         const alivePicks = currentPagePicks - deceasedPicks;
         const averageAge = currentPagePicks > 0
-          ? picksData.reduce((sum: number, pick: PickDetail) => sum + (pick.pick_person_age || 0), 0) / currentPagePicks
+          ? response.data.reduce((sum: number, pick: PickDetail) => sum + (pick.pick_person_age || 0), 0) / currentPagePicks
           : 0;
 
         // Track successful picks load with statistics
@@ -123,8 +141,8 @@ export default function PicksPage() {
           alive_picks: alivePicks,
           average_age: Math.round(averageAge),
           has_data: currentPagePicks > 0,
-          page: currentPage,
-          page_size: pageSize
+          page: response.page,
+          page_size: PAGE_SIZE
         });
       } catch (err) {
         console.error('Failed to fetch picks:', err);
@@ -148,15 +166,25 @@ export default function PicksPage() {
   }, [selectedYear, selectedPlayer, currentPage, analytics]);
 
   const handlePageChange = useCallback((newPage: number) => {
+    // Ensure newPage is a number and different from current page
+    const pageToSet = Number(newPage);
+    if (pageToSet === currentPage) {
+      console.log('Attempted to set same page number, ignoring:', pageToSet);
+      return;
+    }
+    
+    console.log(`Changing page from ${currentPage} to ${pageToSet}`);
+    
     analytics.trackEvent('PICKS_FILTER_CHANGED', {
       filter_type: 'page',
       previous_page: currentPage,
-      new_page: newPage,
+      new_page: pageToSet,
       year: selectedYear,
-      page_size: pageSize
+      page_size: PAGE_SIZE
     });
-    setCurrentPage(newPage);
-  }, [analytics, currentPage, selectedYear, pageSize]);
+    
+    setCurrentPage(pageToSet);
+  }, [analytics, currentPage, selectedYear]);
 
   const formatDate = (dateString: string | null) => {
     if (!dateString) return 'N/A';
@@ -299,14 +327,14 @@ export default function PicksPage() {
               <div className="flex flex-1 justify-between sm:hidden">
                 <button
                   onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
-                  disabled={currentPage === 1}
+                  disabled={currentPage === 1 || picksLoading}
                   className="relative inline-flex items-center rounded-md bg-white dark:bg-gray-800 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 ring-1 ring-inset ring-gray-300 dark:ring-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Previous
                 </button>
                 <button
                   onClick={() => handlePageChange(Math.min(paginationMeta.total_pages, currentPage + 1))}
-                  disabled={currentPage === paginationMeta.total_pages}
+                  disabled={currentPage === paginationMeta.total_pages || picksLoading}
                   className="relative ml-3 inline-flex items-center rounded-md bg-white dark:bg-gray-800 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 ring-1 ring-inset ring-gray-300 dark:ring-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Next
@@ -315,35 +343,97 @@ export default function PicksPage() {
               <div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
                 <div>
                   <p className="text-sm text-gray-700 dark:text-gray-300">
-                    Showing <span className="font-medium">{((currentPage - 1) * pageSize) + 1}</span> to{' '}
+                    Showing <span className="font-medium">{((paginationMeta.page - 1) * paginationMeta.page_size) + 1}</span> to{' '}
                     <span className="font-medium">
-                      {Math.min(currentPage * pageSize, paginationMeta.total)}
+                      {Math.min(paginationMeta.page * paginationMeta.page_size, paginationMeta.total)}
                     </span> of{' '}
                     <span className="font-medium">{paginationMeta.total}</span> results
+                  </p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    Page <span className="font-medium">{paginationMeta.page}</span> of <span className="font-medium">{paginationMeta.total_pages}</span>
                   </p>
                 </div>
                 <div>
                   <nav className="isolate inline-flex -space-x-px rounded-md shadow-sm" aria-label="Pagination">
+                    {/* First Page Button */}
+                    <button
+                      onClick={() => handlePageChange(1)}
+                      disabled={currentPage === 1 || picksLoading}
+                      className="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-700 dark:text-gray-300 ring-1 ring-inset ring-gray-300 dark:ring-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 focus:z-20 focus:outline-offset-0 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <span className="sr-only">First</span>
+                      <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                        <path fillRule="evenodd" d="M15.79 14.77a.75.75 0 01-1.06.02l-4.5-4.25a.75.75 0 010-1.08l4.5-4.25a.75.75 0 111.04 1.08L11.832 10l3.938 3.71a.75.75 0 01.02 1.06zm-6 0a.75.75 0 01-1.06.02l-4.5-4.25a.75.75 0 010-1.08l4.5-4.25a.75.75 0 111.04 1.08L5.832 10l3.938 3.71a.75.75 0 01.02 1.06z" clipRule="evenodd" />
+                      </svg>
+                    </button>
+                    {/* Previous Button */}
                     <button
                       onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
-                      disabled={currentPage === 1}
-                      className="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-700 dark:text-gray-300 ring-1 ring-inset ring-gray-300 dark:ring-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 focus:z-20 focus:outline-offset-0 disabled:opacity-50 disabled:cursor-not-allowed"
+                      disabled={currentPage === 1 || picksLoading}
+                      className="relative inline-flex items-center px-2 py-2 text-gray-700 dark:text-gray-300 ring-1 ring-inset ring-gray-300 dark:ring-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 focus:z-20 focus:outline-offset-0 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <span className="sr-only">Previous</span>
                       <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                         <path fillRule="evenodd" d="M12.79 5.23a.75.75 0 01-.02 1.06L8.832 10l3.938 3.71a.75.75 0 11-1.04 1.08l-4.5-4.25a.75.75 0 010-1.08l4.5-4.25a.75.75 0 011.06.02z" clipRule="evenodd" />
                       </svg>
                     </button>
+                    {/* Page Number Display */}
+                    <span className="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-700 dark:text-gray-300 ring-1 ring-inset ring-gray-300 dark:ring-gray-700 focus:outline-offset-0">
+                      {picksLoading ? (
+                        <div className="w-4 h-4 border-2 border-gray-500 border-t-transparent rounded-full animate-spin mx-2"></div>
+                      ) : (
+                        paginationMeta.page
+                      )}
+                    </span>
+                    {/* Next Button */}
                     <button
                       onClick={() => handlePageChange(Math.min(paginationMeta.total_pages, currentPage + 1))}
-                      disabled={currentPage === paginationMeta.total_pages}
-                      className="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-700 dark:text-gray-300 ring-1 ring-inset ring-gray-300 dark:ring-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 focus:z-20 focus:outline-offset-0 disabled:opacity-50 disabled:cursor-not-allowed"
+                      disabled={currentPage === paginationMeta.total_pages || picksLoading}
+                      className="relative inline-flex items-center px-2 py-2 text-gray-700 dark:text-gray-300 ring-1 ring-inset ring-gray-300 dark:ring-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 focus:z-20 focus:outline-offset-0 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <span className="sr-only">Next</span>
                       <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                         <path fillRule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clipRule="evenodd" />
                       </svg>
                     </button>
+                    {/* Last Page Button */}
+                    <button
+                      onClick={() => handlePageChange(paginationMeta.total_pages)}
+                      disabled={currentPage === paginationMeta.total_pages || picksLoading}
+                      className="relative inline-flex items-center px-2 py-2 text-gray-700 dark:text-gray-300 ring-1 ring-inset ring-gray-300 dark:ring-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 focus:z-20 focus:outline-offset-0 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <span className="sr-only">Last</span>
+                      <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                        <path fillRule="evenodd" d="M4.21 5.23a.75.75 0 011.06-.02l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 11-1.04-1.08L8.168 10 4.23 6.29a.75.75 0 01-.02-1.06zm6 0a.75.75 0 011.06-.02l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 11-1.04-1.08L14.168 10 10.23 6.29a.75.75 0 01-.02-1.06z" clipRule="evenodd" />
+                      </svg>
+                    </button>
+                    
+                    {/* Direct Page Input */}
+                    <div className="relative ml-3 inline-flex items-center rounded-md bg-white dark:bg-gray-800 px-3 py-1 text-sm font-medium text-gray-700 dark:text-gray-300 ring-1 ring-inset ring-gray-300 dark:ring-gray-700">
+                      <span className="mr-2">Go to:</span>
+                      <input
+                        type="number"
+                        min={1}
+                        max={paginationMeta.total_pages}
+                        value={currentPage}
+                        onChange={(e) => {
+                          const value = parseInt(e.target.value);
+                          if (!isNaN(value) && value >= 1 && value <= paginationMeta.total_pages) {
+                            handlePageChange(value);
+                          }
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            const value = parseInt((e.target as HTMLInputElement).value);
+                            if (!isNaN(value) && value >= 1 && value <= paginationMeta.total_pages) {
+                              handlePageChange(value);
+                            }
+                          }
+                        }}
+                        className="w-12 rounded-md border-0 py-1 pl-2 text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800 ring-1 ring-inset ring-gray-300 dark:ring-gray-700 focus:ring-2 focus:ring-indigo-600 sm:text-sm"
+                        disabled={picksLoading}
+                      />
+                    </div>
                   </nav>
                 </div>
               </div>
