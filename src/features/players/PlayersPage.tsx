@@ -107,7 +107,7 @@ export default function PlayersPage() {
                         Year
                       </th>
                       <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-gray-100">
-                        Phone Number
+                        Has Phone Number
                       </th>
                       <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-gray-100">
                         Phone Verified
@@ -147,7 +147,11 @@ export default function PlayersPage() {
                             {player.year}
                           </td>
                           <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500 dark:text-gray-400">
-                            {player.phone_number || '-'}
+                            {player.has_phone ? (
+                              <CheckCircleIcon className="h-5 w-5 text-green-500" aria-label="Has phone number" />
+                            ) : (
+                              <XCircleIcon className="h-5 w-5 text-red-500" aria-label="No phone number" />
+                            )}
                           </td>
                           <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500 dark:text-gray-400">
                             {player.phone_verified ? (

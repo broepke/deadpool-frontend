@@ -142,7 +142,7 @@ export function SearchResults({
                       <>
                         Draft Order: {result.attributes.metadata.draft_order || 'N/A'}
                         <br />
-                        Phone: {result.attributes.metadata.phone_number || 'N/A'}
+                        Has Phone: {result.attributes.metadata.has_phone ? 'Yes' : 'No'}
                       </>
                     )}
                   </td>

@@ -32,6 +32,8 @@ export interface Player {
   draft_order: number;
   year: number;
   phone_number?: string;
+  has_phone_number?: boolean;
+  has_phone?: boolean;
   phone_verified?: boolean;
   sms_notifications_enabled?: boolean;
   phone_verification_id?: string;
@@ -45,6 +47,8 @@ export interface PlayerUpdate {
   draft_order?: number;
   year?: number;
   phone_number?: string;
+  has_phone_number?: boolean;
+  has_phone?: boolean;
   phone_verified?: boolean;
   sms_notifications_enabled?: boolean;
   phone_verification_id?: string;
@@ -179,6 +183,8 @@ export interface SearchResultMetadata {
   WikiPage?: string;
   draft_order?: number;
   phone_number?: string;
+  has_phone_number?: boolean;
+  has_phone?: boolean;
   phone_verified?: boolean;
   sms_notifications_enabled?: boolean;
 }
