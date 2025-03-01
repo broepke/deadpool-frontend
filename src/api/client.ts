@@ -161,15 +161,9 @@ class ApiClient {
         console.log('Processed page parameter:', processedParams.page);
       }
       
-      // Add a timestamp to prevent caching
-      const paramsWithTimestamp = {
-        ...processedParams,
-        _t: Date.now()
-      };
-      
       // Build query string manually for logging
       const queryParams = new URLSearchParams();
-      Object.entries(paramsWithTimestamp || {}).forEach(([key, value]) => {
+      Object.entries(processedParams || {}).forEach(([key, value]) => {
         if (value !== undefined && value !== null) {
           queryParams.append(key, value.toString());
         }
@@ -182,7 +176,7 @@ class ApiClient {
       
       // Make the request with the processed parameters
       const response = await this.client.get<T>(url, {
-        params: paramsWithTimestamp
+        params: processedParams
       });
       
       // Safely log the page value if it exists
