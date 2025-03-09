@@ -174,6 +174,25 @@ const PlayerAnalyticsPage = () => {
             </div>
           </div>
 
+          {/* Points Information */}
+          <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow mb-8">
+            <h3 className="text-lg font-semibold mb-4 dark:text-gray-100">Points</h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="bg-indigo-50 dark:bg-indigo-900/30 p-4 rounded-lg">
+                <h4 className="text-gray-600 dark:text-gray-400 text-sm mb-1">Current Points</h4>
+                <p className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">{player.points.current}</p>
+              </div>
+              <div className="bg-indigo-50 dark:bg-indigo-900/30 p-4 rounded-lg">
+                <h4 className="text-gray-600 dark:text-gray-400 text-sm mb-1">Total Potential</h4>
+                <p className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">{player.points.total_potential}</p>
+              </div>
+              <div className="bg-indigo-50 dark:bg-indigo-900/30 p-4 rounded-lg">
+                <h4 className="text-gray-600 dark:text-gray-400 text-sm mb-1">Remaining Points</h4>
+                <p className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">{player.points.remaining}</p>
+              </div>
+            </div>
+          </div>
+
           {/* Preferred Age Ranges */}
           <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow mb-8">
             <h3 className="text-lg font-semibold mb-4 dark:text-gray-100">Preferred Age Ranges</h3>

@@ -75,6 +75,11 @@ export interface PlayerAnalyticsResponse {
       date: string | null;
       person_name?: string;
     }>;
+    points: {
+      current: number;
+      total_potential: number;
+      remaining: number;
+    };
   }>;
   metadata: {
     year: number;
