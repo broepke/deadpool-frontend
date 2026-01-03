@@ -6,6 +6,7 @@ import { SearchBar } from '../../components/common/SearchBar';
 import { SearchResults } from '../../components/common/SearchResults';
 import { searchService } from '../../api/services/search';
 import { useAnalytics } from '../../services/analytics/provider';
+import { formatDateUTC } from '../../utils/dateUtils';
 
 type StatusFilter = 'all' | 'deceased' | 'alive';
 
@@ -238,14 +239,6 @@ export default function PeoplePage() {
     setCurrentPage(newPage);
   }, [analytics, currentPage, pageSize]);
 
-  const formatDate = (dateString: string | null | undefined) => {
-    if (!dateString) return 'N/A';
-    return new Date(dateString).toLocaleDateString(undefined, {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    });
-  };
 
   return (
     <div className="space-y-4">
@@ -362,10 +355,10 @@ export default function PeoplePage() {
                               {person.metadata?.Age || 'N/A'}
                             </td>
                             <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500 dark:text-gray-400">
-                              {formatDate(person.metadata?.BirthDate)}
+                              {formatDateUTC(person.metadata?.BirthDate, { dateStyle: 'medium' })}
                             </td>
                             <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500 dark:text-gray-400">
-                              {formatDate(person.metadata?.DeathDate)}
+                              {formatDateUTC(person.metadata?.DeathDate, { dateStyle: 'medium' })}
                             </td>
                             <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500 dark:text-gray-400">
                               <button
@@ -402,7 +395,7 @@ export default function PeoplePage() {
                                             Draft Order: {pick.draft_order}
                                           </div>
                                           <div className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                                            Pick Date: {new Date(pick.pick_timestamp || '').toLocaleDateString()}
+                                            Pick Date: {formatDateUTC(pick.pick_timestamp)}
                                           </div>
                                         </div>
                                       ))}

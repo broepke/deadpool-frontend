@@ -5,6 +5,7 @@ import type { PlayerAnalyticsResponse } from '../../api/services/reporting';
 import { LoadingSpinner } from '../../components/common/LoadingSpinner';
 import { YearSelect } from '../../components/common/YearSelect';
 import { useAnalytics } from '../../services/analytics/provider';
+import { formatDateForChart, formatDateDetailed, formatTimestampUTC } from '../../utils/dateUtils';
 
 const PlayerAnalyticsPage = () => {
   const [data, setData] = useState<PlayerAnalyticsResponse['data']>([]);
@@ -230,8 +231,7 @@ const PlayerAnalyticsPage = () => {
                     label={{ value: 'Date', position: 'bottom', offset: 0 }}
                     domain={[`${selectedYear}-01-01`, `${selectedYear}-12-31`]}
                     tickFormatter={(date) => {
-                      if (!date) return '';
-                      return new Date(date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+                      return formatDateForChart(date);
                     }}
                   />
                   <YAxis
@@ -240,15 +240,14 @@ const PlayerAnalyticsPage = () => {
                   <Tooltip
                     formatter={(value, name) => [value, name === 'score' ? 'Score' : name]}
                     labelFormatter={(date) => {
-                      if (!date) return 'No date';
-                      return new Date(date).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
+                      return formatDateDetailed(date);
                     }}
                     content={({ active, payload }) => {
                       if (active && payload && payload.length) {
                         const data = payload[0].payload;
                         return (
                           <div className="bg-white dark:bg-gray-800 p-2 border border-gray-200 dark:border-gray-700 rounded shadow">
-                            <p className="font-semibold">{data.date ? new Date(data.date).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' }) : 'No date'}</p>
+                            <p className="font-semibold">{formatDateDetailed(data.date)}</p>
                             <p className="text-indigo-600 dark:text-indigo-400">Score: {data.score}</p>
                             {data.personName && <p className="text-gray-600 dark:text-gray-400">Person: {data.personName}</p>}
                           </div>
@@ -276,7 +275,7 @@ const PlayerAnalyticsPage = () => {
       {/* Last Updated */}
       {metadata && (
         <div className="mt-8 text-sm text-gray-500 dark:text-gray-400">
-          Last updated: {new Date(metadata.updated_at).toLocaleString()}
+          Last updated: {formatTimestampUTC(metadata.updated_at)}
         </div>
       )}
     </div>

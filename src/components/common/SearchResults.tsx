@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 import { SearchResult, PickDetail } from '../../api/types';
 import { LoadingSpinner } from './LoadingSpinner';
+import { formatDateUTC } from '../../utils/dateUtils';
 
 interface SearchResultsProps {
   results: SearchResult[];
@@ -42,14 +43,6 @@ export function SearchResults({
     [metadata.total, metadata.limit]
   );
 
-  const formatDate = (dateString: string | undefined) => {
-    if (!dateString) return 'N/A';
-    return new Date(dateString).toLocaleDateString(undefined, {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    });
-  };
 
   if (isLoading) {
     return (
@@ -130,11 +123,11 @@ export function SearchResults({
                       <>
                         Age: {result.attributes.metadata.Age || 'N/A'}
                         <br />
-                        Birth: {formatDate(result.attributes.metadata.BirthDate)}
+                        Birth: {formatDateUTC(result.attributes.metadata.BirthDate, { dateStyle: 'medium' })}
                         {result.attributes.status === 'deceased' && (
                           <>
                             <br />
-                            Death: {formatDate(result.attributes.metadata.DeathDate)}
+                            Death: {formatDateUTC(result.attributes.metadata.DeathDate, { dateStyle: 'medium' })}
                           </>
                         )}
                       </>
@@ -181,7 +174,7 @@ export function SearchResults({
                                   Draft Order: {pick.draft_order}
                                 </div>
                                 <div className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                                  Pick Date: {new Date(pick.pick_timestamp || '').toLocaleDateString()}
+                                  Pick Date: {formatDateUTC(pick.pick_timestamp)}
                                 </div>
                               </div>
                             ))}

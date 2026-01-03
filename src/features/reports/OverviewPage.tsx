@@ -5,6 +5,7 @@ import type { OverviewResponse } from '../../api/services/reporting';
 import { LoadingSpinner } from '../../components/common/LoadingSpinner';
 import { YearSelect } from '../../components/common/YearSelect';
 import { useAnalytics } from '../../services/analytics/provider';
+import { formatTimestampUTC } from '../../utils/dateUtils';
 
 const OverviewPage = () => {
   const [data, setData] = useState<OverviewResponse['data'] | null>(null);
@@ -135,7 +136,7 @@ const OverviewPage = () => {
 
       {/* Last Updated */}
       <div className="mt-8 text-sm text-gray-500 dark:text-gray-400">
-        Last updated: {new Date(data.updated_at).toLocaleString()}
+        Last updated: {formatTimestampUTC(data.updated_at)}
       </div>
     </div>
   );

@@ -5,6 +5,7 @@ import type { TimeAnalyticsResponse } from '../../api/services/reporting';
 import { LoadingSpinner } from '../../components/common/LoadingSpinner';
 import { YearSelect } from '../../components/common/YearSelect';
 import { useAnalytics } from '../../services/analytics/provider';
+import { formatDateForChart, formatDateDetailed } from '../../utils/dateUtils';
 
 const TimeAnalyticsPage = () => {
   const [data, setData] = useState<TimeAnalyticsResponse['data']>([]);
@@ -125,8 +126,8 @@ const TimeAnalyticsPage = () => {
             <LineChart data={data}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis 
-                dataKey="timestamp" 
-                tickFormatter={(value) => new Date(value).toLocaleDateString()}
+                dataKey="timestamp"
+                tickFormatter={formatDateForChart}
               />
               <YAxis />
               <YAxis
@@ -135,7 +136,7 @@ const TimeAnalyticsPage = () => {
                 tickFormatter={(value) => `${(value * 100).toFixed(0)}%`}
               />
               <Tooltip
-                labelFormatter={(value) => new Date(value).toLocaleDateString()}
+                labelFormatter={formatDateDetailed}
               />
               <Legend />
               <Line 
@@ -173,8 +174,8 @@ const TimeAnalyticsPage = () => {
             <LineChart data={data}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis 
-                dataKey="timestamp" 
-                tickFormatter={(value) => new Date(value).toLocaleDateString()}
+                dataKey="timestamp"
+                tickFormatter={formatDateForChart}
               />
               <YAxis />
               <YAxis
@@ -183,7 +184,7 @@ const TimeAnalyticsPage = () => {
                 tickFormatter={(value) => `${(value * 100).toFixed(0)}%`}
               />
               <Tooltip
-                labelFormatter={(value) => new Date(value).toLocaleDateString()}
+                labelFormatter={formatDateDetailed}
               />
               <Legend />
               <Line 

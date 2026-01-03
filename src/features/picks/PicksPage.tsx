@@ -3,6 +3,7 @@ import { picksApi, playersApi } from '../../api';
 import { PickDetail, Player, PaginationMeta } from '../../api/types';
 import { LoadingSpinner } from '../../components/common/LoadingSpinner';
 import { useAnalytics } from '../../services/analytics/provider';
+import { formatDateUTC } from '../../utils/dateUtils';
 
 const AVAILABLE_YEARS = [2026, 2025, 2024, 2023];
 const PAGE_SIZE = 10;
@@ -186,18 +187,6 @@ export default function PicksPage() {
     setCurrentPage(pageToSet);
   }, [analytics, currentPage, selectedYear]);
 
-  const formatDate = (dateString: string | null) => {
-    if (!dateString) return 'N/A';
-    // Parse the date and display it in UTC to show the actual date the pick was made
-    // This avoids timezone confusion where a pick made on 1/1/26 UTC shows as 12/31/25 in EST
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-      timeZone: 'UTC',
-      year: '2-digit',
-      month: 'numeric',
-      day: 'numeric'
-    });
-  };
 
   return (
     <div>
@@ -315,7 +304,7 @@ export default function PicksPage() {
                             </span>
                           </td>
                           <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500 dark:text-gray-400">
-                            {formatDate(pick.pick_timestamp)}
+                            {formatDateUTC(pick.pick_timestamp)}
                           </td>
                         </tr>
                       ))

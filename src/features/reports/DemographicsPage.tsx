@@ -5,6 +5,7 @@ import type { DemographicsResponse } from '../../api/services/reporting';
 import { LoadingSpinner } from '../../components/common/LoadingSpinner';
 import { YearSelect } from '../../components/common/YearSelect';
 import { useAnalytics } from '../../services/analytics/provider';
+import { formatTimestampUTC } from '../../utils/dateUtils';
 
 const DemographicsPage = () => {
   const [data, setData] = useState<DemographicsResponse['data']>([]);
@@ -174,7 +175,7 @@ const DemographicsPage = () => {
       {/* Last Updated */}
       {metadata && (
         <div className="mt-8 text-sm text-gray-500 dark:text-gray-400">
-          Last updated: {new Date(metadata.updated_at).toLocaleString()}
+          Last updated: {formatTimestampUTC(metadata.updated_at)}
         </div>
       )}
     </div>
