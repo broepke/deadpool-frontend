@@ -5,12 +5,12 @@ import { Player } from '../../api/types';
 import { LoadingSpinner } from '../../components/common/LoadingSpinner';
 import { useAnalytics } from '../../services/analytics/provider';
 
-const AVAILABLE_YEARS = [2025, 2024, 2023];
+const AVAILABLE_YEARS = [2026, 2025, 2024, 2023];
 
 export default function PlayersPage() {
   const analytics = useAnalytics();
   const [players, setPlayers] = useState<Player[]>([]);
-  const [selectedYear, setSelectedYear] = useState(2025);
+  const [selectedYear, setSelectedYear] = useState(2026);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 

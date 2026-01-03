@@ -4,13 +4,13 @@ import { PickDetail, Player, PaginationMeta } from '../../api/types';
 import { LoadingSpinner } from '../../components/common/LoadingSpinner';
 import { useAnalytics } from '../../services/analytics/provider';
 
-const AVAILABLE_YEARS = [2025, 2024, 2023];
+const AVAILABLE_YEARS = [2026, 2025, 2024, 2023];
 const PAGE_SIZE = 10;
 
 export default function PicksPage() {
   const analytics = useAnalytics();
   const [picks, setPicks] = useState<PickDetail[]>([]);
-  const [selectedYear, setSelectedYear] = useState(2025);
+  const [selectedYear, setSelectedYear] = useState(2026);
   const [selectedPlayer, setSelectedPlayer] = useState<string | null>(null);
   const [players, setPlayers] = useState<Player[]>([]);
   const [picksLoading, setPicksLoading] = useState(true);

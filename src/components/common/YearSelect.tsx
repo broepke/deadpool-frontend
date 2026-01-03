@@ -1,7 +1,7 @@
 import { useAnalytics } from '../../services/analytics/provider';
 import { AnalyticsEventName } from '../../services/analytics/constants';
 
-const AVAILABLE_YEARS = [2023, 2024, 2025];
+const AVAILABLE_YEARS = [2026, 2025, 2024, 2023];
 
 interface YearSelectProps {
   selectedYear: number;

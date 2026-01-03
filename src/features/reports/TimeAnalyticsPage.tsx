@@ -9,7 +9,7 @@ import { useAnalytics } from '../../services/analytics/provider';
 const TimeAnalyticsPage = () => {
   const [data, setData] = useState<TimeAnalyticsResponse['data']>([]);
   const [metadata, setMetadata] = useState<TimeAnalyticsResponse['metadata'] | null>(null);
-  const [selectedYear, setSelectedYear] = useState(2024);
+  const [selectedYear, setSelectedYear] = useState(2026);
   const [period, setPeriod] = useState<'daily' | 'weekly' | 'monthly'>('monthly');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
