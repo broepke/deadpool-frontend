@@ -188,9 +188,14 @@ export default function PicksPage() {
 
   const formatDate = (dateString: string | null) => {
     if (!dateString) return 'N/A';
-    return new Date(dateString + 'Z').toLocaleString(undefined, {
-      dateStyle: 'short',
-      timeStyle: 'short'
+    // Parse the date and display it in UTC to show the actual date the pick was made
+    // This avoids timezone confusion where a pick made on 1/1/26 UTC shows as 12/31/25 in EST
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
+      timeZone: 'UTC',
+      year: '2-digit',
+      month: 'numeric',
+      day: 'numeric'
     });
   };
 
