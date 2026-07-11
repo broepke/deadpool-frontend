@@ -13,6 +13,7 @@ const cognitoAuthConfig = {
   scope: import.meta.env.VITE_COGNITO_SCOPE,
   userStore: new WebStorageStateStore({ store: window.localStorage }),
   loadUserInfo: true,
+  automaticSilentRenew: true,
   onSigninCallback: () => {
     window.history.replaceState({}, document.title, window.location.pathname);
   }
